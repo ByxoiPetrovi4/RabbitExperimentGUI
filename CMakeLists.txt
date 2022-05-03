@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
+find_package(OpenCV REQUIRED)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -53,6 +54,8 @@ set_target_properties(RabbitExperimentGUI PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
+
+target_link_libraries(RabbitExperimentGUI PRIVATE ${OpenCV_LIBS} )
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(RabbitExperimentGUI)
