@@ -27,9 +27,13 @@ qt_add_executable(RabbitExperimentGUI
 add_subdirectory(src)
 
 list(APPEND EXTRA_LIBS SerialDiag
-                        RabbitDiag)
-list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/serialdiag"
-                        "${PROJECT_SOURCE_DIR}/src/rabbitdiag")
+                        RabbitDiag
+                        RE_DataHandler)
+
+list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/data_handler"
+                        "${PROJECT_SOURCE_DIR}/src/serialdiag"
+                        "${PROJECT_SOURCE_DIR}/src/rabbitdiag"
+                        )
 
 set_target_properties(RabbitExperimentGUI PROPERTIES
     WIN32_EXECUTABLE TRUE

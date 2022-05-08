@@ -3,6 +3,8 @@
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
+add_subdirectory(data_handler)
+
 add_subdirectory(serialdiag)
 
 add_subdirectory(rabbitdiag)
