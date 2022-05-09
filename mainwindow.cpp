@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -28,7 +28,12 @@ void MainWindow::showStatusMessage(const QString &str)
 
 void MainWindow::readData()
 {
-    const QString str(serialPort->readAll());
+    if(serialPort->bytesAvailable()<3)return;
+    char buf[128];
+    uint16_t pos = 1;
+    serialPort->read(buf, 3);
+    strcpy(buf, ToStr(process_event(buf, pos, 3)));
+    const QString str(tr(buf));
     ui->plainTextEdit->moveCursor(QTextCursor::End);
     ui->plainTextEdit->insertPlainText(str);
 }

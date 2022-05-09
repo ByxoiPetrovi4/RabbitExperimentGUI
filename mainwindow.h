@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include "serialdiag.h"
 #include "rabbitdiag.h"
+#include "data_handler.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

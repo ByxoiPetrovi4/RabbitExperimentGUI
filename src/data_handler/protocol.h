@@ -5,7 +5,7 @@
 #include <cstring>
 #include <cmath>
 
-#include "setup_header.h"
+//#include "setup_header.h"
 
 #define ER_START_COMMUNICATION '~'
 //Communications starts when after 3 start symbols
@@ -43,7 +43,7 @@ enum SSymbols : char
     Command     = ':',
     Answer      = ';',
     Event       = '&',
-    End         = '\n',
+    End         = '\r',
     Delimetr    = '$',
     Comment     = '#',
     Error       = '!'

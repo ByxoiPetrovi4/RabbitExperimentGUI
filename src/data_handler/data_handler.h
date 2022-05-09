@@ -20,6 +20,9 @@ enum RE_DataType : char
     DTKeyword,
     DTSettings,
     DTError = 0x7f
+#ifdef SUPPORT_MEMORY_ALLOCATION
+    , DTAbstractData = 0x7e
+#endif
 };
 
 struct __re_abstract_data
@@ -30,7 +33,8 @@ struct __re_abstract_data
 };
 
 typedef void (*RE_DataWrite)(const __re_abstract_data, FILE*);
-typedef __re_abstract_data (*RE_DataProcess)(const char*);
+typedef __re_abstract_data (*RE_DataProcess)(const char*, uint16_t&,
+                                             const uint16_t);
 
 struct RE_OutputFiles
 {
@@ -41,14 +45,22 @@ struct RE_OutputFiles
 
 //**************Messages processing**************//
 
-__re_abstract_data process_message(const char* msg, const uint16_t len);
+__re_abstract_data process_message(const char* msg, const uint16_t len,
+                                   char* ans);
 //out_len is length in BYTES
+//обработка до спецсимвола дальше вызов функции обработки
+//далее прыжок по указателю до следующей позиции пока не дойдем до len-1
+//добавить в массив байтов в конце буфера 0
 
-__re_abstract_data process_event(const char*);
+__re_abstract_data process_event(const char*, uint16_t&,
+                                 const uint16_t);
 
-__re_abstract_data process_keyword(const char*);
+__re_abstract_data process_keyword(const char*, uint16_t&,
+                                   const uint16_t);
 
-__re_abstract_data process_settings(const char*);
+__re_abstract_data process_settings(const char*, uint16_t&,
+                                    const uint16_t);
+
 //**************File data processing**************//
 
 RE_OutputFiles open_folder(const char*);
@@ -65,6 +77,10 @@ void write_settings(const __re_abstract_data, FILE*);
 //**************Abstract convertions***************//
 
 RE_Settings RE_Settings(__re_abstract_data);
+
+RE_DataType RE_DataType(SSymbols);
+
+char* ToStr(__re_abstract_data);
 
 const RE_DataProcess _re_process_funcs[] = {
     process_event, process_keyword, process_settings};
