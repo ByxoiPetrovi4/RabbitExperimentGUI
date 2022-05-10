@@ -28,11 +28,13 @@ add_subdirectory(src)
 
 list(APPEND EXTRA_LIBS SerialDiag
                         RabbitDiag
-                        RE_DataHandler)
+                        RE_DataHandler
+                        RESerial)
 
-list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/data_handler"
-                        "${PROJECT_SOURCE_DIR}/src/serialdiag"
+list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/reserial/data_handler"
+                        "${PROJECT_SOURCE_DIR}/src/reserial/serialdiag"
                         "${PROJECT_SOURCE_DIR}/src/rabbitdiag"
+                        "${PROJECT_SOURCE_DIR}/src/reserial"
                         )
 
 set_target_properties(RabbitExperimentGUI PROPERTIES

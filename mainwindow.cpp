@@ -8,12 +8,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     serialDialog = new SerialDiag(this);
     rabbitDialog = new RabbitDiag(this);
-    serialPort = new QSerialPort(this);
+    reSerial = new RESerial(this);
 
     connected = false;
-
-    connect(serialPort, &QSerialPort::readyRead, this, &MainWindow::readData);
-
+    //Warning connections through dll with cmake works only with macroses!
+    connect(reSerial, SIGNAL(statusChange(QString)), this,
+            SLOT(statusChange(QString)));
+    connect(reSerial, SIGNAL(stateChange(RESerial::ProcessState)),
+                             this, SLOT(stateChange(RESerial::ProcessState)));
+    connect(reSerial, SIGNAL(newMessage(QString)),
+            this, SLOT(newMessage(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -21,21 +25,32 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showStatusMessage(const QString &str)
+void MainWindow::statusChange(QString str)
 {
     ui->connectStatus->setText(str);
 }
 
-void MainWindow::readData()
+void MainWindow::stateChange(RESerial::ProcessState st)
 {
-    if(serialPort->bytesAvailable()<3)return;
-    char buf[128];
-    uint16_t pos = 1;
-    serialPort->read(buf, 3);
-    strcpy(buf, ToStr(process_event(buf, pos, 3)));
-    const QString str(tr(buf));
+    switch(st)
+    {
+        case RESerial::NoConnect:
+            statusChange(tr("Not connected"));
+            ui->connectButton->setText(tr("Connect"));
+            connected = false;
+            break;
+        case RESerial::AwaitAnswer:
+        case RESerial::AwaitEvent:
+            ui->connectButton->setText(tr("Disconnect"));
+            connected = true;
+            break;
+    }
+}
+
+void MainWindow::newMessage( QString txt)
+{
     ui->plainTextEdit->moveCursor(QTextCursor::End);
-    ui->plainTextEdit->insertPlainText(str);
+    ui->plainTextEdit->insertPlainText(txt);
 }
 
 void MainWindow::on_actionSerial_settings_triggered()
@@ -55,33 +70,20 @@ void MainWindow::on_connectButton_clicked()
 {
     if(connected)
     {
-        if(serialPort->disconnect())
+        if(QMessageBox::question(this, "Rabbit Experiment Warning",
+                "Do you really want to disconnect device?",
+                QMessageBox::Yes|QMessageBox::No) ==
+                QMessageBox::No)return;
+        if(reSerial->disconnect())
         {
-            showStatusMessage(tr("Disconnected"));
+            statusChange(tr("Disconnected"));
             connected = false;
             ui->connectButton->setText(tr("Connect"));
             return;
         }
-        QMessageBox::critical(this, tr("Error"), serialPort->errorString());
-        showStatusMessage(tr("Serial ERROR!"));
+        QMessageBox::critical(this, tr("Error"), reSerial->errorString());
+        statusChange(tr("Serial ERROR!"));
     }
-    const SerialDiag::Settings p = serialDialog->settings();
-    serialPort->setPortName(p.name);
-    serialPort->setBaudRate(p.baudRate);
-    serialPort->setDataBits(p.dataBits);
-    serialPort->setParity(p.parity);
-    serialPort->setStopBits(p.stopBits);
-    serialPort->setFlowControl(p.flowControl);
-    if (serialPort->open(QIODevice::ReadWrite)) {
-        connected = true;
-        ui->connectButton->setText(tr("Disconnect"));
-        showStatusMessage(tr("Connected to %1 : %2, %3, %4, %5, %6")
-                          .arg(p.name).arg(p.stringBaudRate).arg(p.stringDataBits)
-                          .arg(p.stringParity).arg(p.stringStopBits).arg(p.stringFlowControl));
-    } else {
-        QMessageBox::critical(this, tr("Error"), serialPort->errorString());
-
-        showStatusMessage(tr("Open error"));
-    }
+    reSerial->Connect(serialDialog->settings());
 }
 

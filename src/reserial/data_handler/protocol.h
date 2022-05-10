@@ -7,6 +7,16 @@
 
 //#include "setup_header.h"
 
+struct RE_Settings
+{
+    uint16_t    food;
+    uint32_t    press_interval;
+    uint32_t    sound_length;
+    uint8_t     manual;
+    uint32_t    min_delay;
+    uint32_t    max_delay;
+};
+
 #define ER_START_COMMUNICATION '~'
 //Communications starts when after 3 start symbols
 //master will reciece 3 start symbols as answer
@@ -61,15 +71,5 @@ enum SSymbols : char
 //Error on reading second data packet received error = 2
 //R: :c\n               T: ;c\n
 //Command end is received from microcontroller, GUI will stop records
-
-struct RE_Settings
-{
-    uint16_t    food;
-    uint32_t    press_interval;
-    uint32_t    sound_length;
-    uint8_t     manual;
-    uint32_t    min_delay;
-    uint32_t    max_delay;
-};
 
 #endif

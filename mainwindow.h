@@ -8,6 +8,7 @@
 #include "serialdiag.h"
 #include "rabbitdiag.h"
 #include "data_handler.h"
+#include "reserial.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -22,8 +23,10 @@ public:
     ~MainWindow();
     void showStatusMessage(const QString &);
 
-private slots:
-    void readData();
+public slots:
+    void statusChange(QString);
+    void stateChange(RESerial::ProcessState);
+    void newMessage(QString);
 
     void on_actionSerial_settings_triggered();
 
@@ -35,7 +38,7 @@ private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
     RabbitDiag*     rabbitDialog = nullptr;
-    QSerialPort*    serialPort = nullptr;
+    RESerial*       reSerial = nullptr;
 
     bool connected;
 };
