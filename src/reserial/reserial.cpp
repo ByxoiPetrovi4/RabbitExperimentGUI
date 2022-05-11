@@ -29,6 +29,7 @@ void RESerial::Connect(const SerialDiag::Settings st)
     setFlowControl(st.flowControl);
     if(open(QIODevice::ReadWrite))
     {
+        State = NoConnect;
         emit statusChange(tr("Connected to %1 : %2, %3, %4, %5, %6")
                      .arg(st.name).arg(st.stringBaudRate).arg(st.stringDataBits)
                      .arg(st.stringParity).arg(st.stringStopBits).arg(st.stringFlowControl));
@@ -43,7 +44,30 @@ void RESerial::Connect(const SerialDiag::Settings st)
     }
 }
 
+void RESerial::Disconnect()
+{
+    sendCommand(KClose);
+    QThread::msleep(100);
+    close();
+    emit statusChange(tr("Disconnected"));
+    serialTimer->stop();
+    State = NoConnect;
+}
+
+void RESerial::sendCommand(Keywords k)
+{
+    char buf[4] = {Command, k, End, 0};
+    qDebug() << buf;
+    lastTMessage = QByteArray(buf, 3);
+    State = AwaitAnswer;
+    write(lastTMessage);
+    serialTimer->start(RES_DEFAULT_RESEND_INTERVAL);
+}
+
 void RESerial::processNC(void)
+//Connection pattern send '~''~''~' and w8 for same answer
+//if after RES_DEFAULT_MAX_FAILS connection not estabileshed then
+//signal resendFails emit
 {
     qint64 av = bytesAvailable();
     if(av < RES_MINIMUM_LENGTH)return;
@@ -67,18 +91,48 @@ void RESerial::processNC(void)
 }
 
 void RESerial::processAA(void)
+//Processing in await answer from device
+//occures only after command send.
+//Awaiting to receive same last transmitted message
 {
-
+    if(!canReadLine())return;
+    char buf[64];
+    uint16_t len = readLine(buf, 64);
+    __re_abstract_data proc_data = process_message(buf,len);
+    if(proc_data.typ == DTAnswer)
+    {
+        if(memcmp(buf+1, lastTMessage.data()+1, len))return;
+        State = AwaitEvent;
+        serialTimer->stop();
+    }
+    if(proc_data.typ == DTError)
+    {
+        emit statusChange(tr(ToStr(proc_data)));
+        //redact and add writing to .log
+        return;
+    }
+    retimeToStr(GetTimeStamp(), 0, buf);
+    newMessage(tr(ToStr(proc_data)) + " " + buf + "\n");
 }
 
 void RESerial::processAE(void)
+//Proceesing in await event or command from device.
+//if error in message found then error will send to device
+//awaiting resending for the previous message.
+//if all correct state doesn't change.
 {
-    qint64 av = bytesAvailable();
-    if(av < RES_MINIMUM_LENGTH)return;
-    char buf[3];
-    read(buf, 3);
-    uint16_t pos = 1;
-    newMessage(tr(ToStr(process_event(buf,pos,3))));
+    if(!canReadLine())return;
+    char buf[64];
+    uint16_t len = readLine(buf, 64);
+    qDebug() << buf << '\n';
+    __re_abstract_data proc_data = process_message(buf,len);
+    if(proc_data.typ == DTError)
+    {
+        emit statusChange(tr(ToStr(proc_data)));
+        //redact and add writing to .log
+        return;
+    }
+    newMessage(tr(ToStr(proc_data)) + "\n");
 }
 
 void RESerial::dataProcess()

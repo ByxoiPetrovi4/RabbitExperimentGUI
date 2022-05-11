@@ -8,6 +8,8 @@
 #include <QWidget>
 #include <QTimer>
 #include <QMessageBox>
+#include <QtDebug>
+#include <QThread>
 
 #include "serialdiag.h"
 #include "protocol.h"
@@ -17,7 +19,7 @@
 #define RES_DEFAULT_MAX_FAILS       3
 #define RES_MINIMUM_LENGTH          3
 
-const struct RE_Settings defaultRE_Settings = {0, 3000, 3500, 1, 5000, 10000};
+const RE_Settings defaultRE_Settings = {0, 3000, 3500, 1, 5000, 10000};
 
 class RESerial : public QSerialPort
 {
@@ -33,8 +35,10 @@ public:
     void OpenOutput(QString);
     void CloseOutput();
 
-    struct RE_Settings settings();
-    void setSettings(const struct RE_Settings);
+    RE_Settings settings();
+    void setSettings(const RE_Settings);
+    void sendCommand(Keywords);
+    void sendSettings(RE_Settings);
 
 public slots:
     void timerTick();
@@ -44,11 +48,11 @@ signals:
     void newMessage(QString);
     void statusChange(QString);
     void stateChange(RESerial::ProcessState);
-    //void resendFails();
+    void resendFails();
     //void endOfFood();
 
 private:
-    struct RE_Settings Settings;
+    RE_Settings Settings;
     ProcessState State;
 
     void processNC(void);

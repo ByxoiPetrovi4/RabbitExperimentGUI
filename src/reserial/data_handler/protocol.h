@@ -22,7 +22,8 @@ struct RE_Settings
 //master will reciece 3 start symbols as answer
 
 
-//Keywords for protocol
+//Possible keywords for protocol
+//used in answers and commands
 enum Keywords : char
 {
     KSettings    = 's',
@@ -40,6 +41,7 @@ enum Keywords : char
 };
 
 enum Events : char
+//symbols use after Event '&' as indicator of event
 {
     ESound      = 'b',
     EDrop       = 'd',
@@ -49,11 +51,12 @@ enum Events : char
 };
 
 enum SSymbols : char
+//this symbols is reserved for protocol
 {
     Command     = ':',
     Answer      = ';',
     Event       = '&',
-    End         = '\r',
+    End         = '\n',
     Delimetr    = '$',
     Comment     = '#',
     Error       = '!'

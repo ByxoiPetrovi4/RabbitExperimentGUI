@@ -34,6 +34,9 @@ public slots:
 
     void on_connectButton_clicked();
 
+private slots:
+    void on_soundButton_clicked();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;

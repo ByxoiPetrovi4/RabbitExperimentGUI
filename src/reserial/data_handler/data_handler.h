@@ -17,11 +17,13 @@
 enum RE_DataType : char
 {
     DTEvent,
-    DTKeyword,
-    DTSettings,
-    DTError = 0x7f
+    DTAnswer,
+    DTCommand,
+    DTComment,
+    DTError,
+    DTUndef
 #ifdef SUPPORT_MEMORY_ALLOCATION
-    , DTAbstractData = 0x7e
+    , DTAbstractData
 #endif
 };
 
@@ -45,20 +47,22 @@ struct RE_OutputFiles
 
 //**************Messages processing**************//
 
-__re_abstract_data process_message(const char* msg, const uint16_t len,
-                                   char* ans);
+__re_abstract_data process_message(const char* msg, const uint16_t len);
 //out_len is length in BYTES
-//обработка до спецсимвола дальше вызов функции обработки
-//далее прыжок по указателю до следующей позиции пока не дойдем до len-1
-//добавить в массив байтов в конце буфера 0
 
 __re_abstract_data process_event(const char*, uint16_t&,
                                  const uint16_t);
 
-__re_abstract_data process_keyword(const char*, uint16_t&,
+__re_abstract_data process_answer(const char*, uint16_t&,
+                                    const uint16_t);
+
+__re_abstract_data process_command(const char*, uint16_t&,
                                    const uint16_t);
 
-__re_abstract_data process_settings(const char*, uint16_t&,
+__re_abstract_data process_comment(const char*, uint16_t&,
+                                    const uint16_t);
+
+__re_abstract_data process_error(const char*, uint16_t&,
                                     const uint16_t);
 
 //**************File data processing**************//
@@ -70,22 +74,34 @@ void write_data(__re_abstract_data,
 
 void write_event(const __re_abstract_data, FILE*);
 
-void write_keyword(const __re_abstract_data, FILE*);
+void write_answer(const __re_abstract_data, FILE*);
 
-void write_settings(const __re_abstract_data, FILE*);
+void write_command(const __re_abstract_data, FILE*);
+
+void write_comment(const __re_abstract_data, FILE*);
+
+void write_error(const __re_abstract_data, FILE*);
 
 //**************Abstract convertions***************//
 
-RE_Settings RE_Settings(__re_abstract_data);
+RE_Settings ToSettings(__re_abstract_data);
 
-RE_DataType RE_DataType(SSymbols);
+RE_DataType ToRE_DataType(const char);
 
 char* ToStr(__re_abstract_data);
 
 const RE_DataProcess _re_process_funcs[] = {
-    process_event, process_keyword, process_settings};
+    process_event, process_answer, process_command, process_error};
 
 const RE_DataWrite _re_write_funcs[] = {
-    write_event, write_keyword, write_settings};
+    write_event, write_answer, write_command, write_error};
+
+//**************Time functions***************//
+
+typedef uint64_t re_time;
+
+re_time GetTimeStamp();
+
+void retimeToStr(const re_time, const re_time, char*);
 
 #endif

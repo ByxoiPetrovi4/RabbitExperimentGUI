@@ -74,16 +74,17 @@ void MainWindow::on_connectButton_clicked()
                 "Do you really want to disconnect device?",
                 QMessageBox::Yes|QMessageBox::No) ==
                 QMessageBox::No)return;
-        if(reSerial->disconnect())
-        {
-            statusChange(tr("Disconnected"));
-            connected = false;
-            ui->connectButton->setText(tr("Connect"));
-            return;
-        }
-        QMessageBox::critical(this, tr("Error"), reSerial->errorString());
-        statusChange(tr("Serial ERROR!"));
+        reSerial->Disconnect();
+        connected = false;
+        ui->connectButton->setText(tr("Connect"));
+        return;
     }
     reSerial->Connect(serialDialog->settings());
+}
+
+
+void MainWindow::on_soundButton_clicked()
+{
+    reSerial->sendCommand(KSound);
 }
 
