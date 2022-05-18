@@ -39,11 +39,15 @@ void MainWindow::stateChange(RESerial::ProcessState st)
     {
         case RESerial::NoConnect:
             statusChange(tr("Not connected"));
+            ui->connectButton->setText(tr("Send settings"));
+            ui->settingsBox->setEnabled(false);
             ui->connectButton->setText(tr("Connect"));
             connected = false;
             break;
         case RESerial::AwaitAnswer:
+            break;
         case RESerial::AwaitEvent:
+            ui->settingsBox->setEnabled(true);
             ui->connectButton->setText(tr("Disconnect"));
             connected = true;
             break;
@@ -59,6 +63,7 @@ void MainWindow::newMessage( QString txt)
 void MainWindow::settingsReceived(RE_Settings set)
 {
     ui->startButton->setText("Start");
+    ui->settingsBox->setEnabled(false);
     readyToStart = true;
 }
 
@@ -105,7 +110,13 @@ void MainWindow::on_startButton_clicked()
         reSerial->sendCommand(KStart);
         return;
     }
-    RE_Settings st = {100,100,100,100,100,100};
+    RE_Settings st;
+    st.food = 100;
+    st.press_interval = ui->pressIntervalSPBox->value()*1000;
+    st.sound_length = 2500;
+    st.manual = ui->manualCheck->isChecked() ? 1 : 0;
+    st.min_delay = ui->minDelaySPBox->value()*1000;
+    st.max_delay = ui->maxDelaySPBox->value()*1000;
     reSerial->sendSettings(st);
 }
 

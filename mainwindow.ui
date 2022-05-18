@@ -107,7 +107,7 @@
              <x>10</x>
              <y>20</y>
              <width>181</width>
-             <height>551</height>
+             <height>658</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -147,22 +147,30 @@
              </widget>
             </item>
             <item>
-             <widget class="QCheckBox" name="manualCheck">
-              <property name="text">
-               <string>Manual Mode</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QGroupBox" name="settingsBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>220</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>500</height>
+               </size>
+              </property>
               <property name="title">
-               <string>Automatic Settings</string>
+               <string>Settings</string>
               </property>
               <widget class="QWidget" name="verticalLayoutWidget_3">
                <property name="geometry">
@@ -170,7 +178,7 @@
                  <x>0</x>
                  <y>20</y>
                  <width>171</width>
-                 <height>251</height>
+                 <height>191</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -182,7 +190,17 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+                 <widget class="QDoubleSpinBox" name="minDelaySPBox">
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>5.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="label_2">
@@ -192,7 +210,14 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_2"/>
+                 <widget class="QDoubleSpinBox" name="maxDelaySPBox">
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="value">
+                   <double>15.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="label_3">
@@ -202,7 +227,24 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="doubleSpinBox_3"/>
+                 <widget class="QDoubleSpinBox" name="pressIntervalSPBox">
+                  <property name="decimals">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <double>10.000000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>5.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="manualCheck">
+                  <property name="text">
+                   <string>Manual Mode</string>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="verticalSpacer">
