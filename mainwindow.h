@@ -27,6 +27,7 @@ public slots:
     void statusChange(QString);
     void stateChange(RESerial::ProcessState);
     void newMessage(QString);
+    void settingsReceived(RE_Settings);
 
     void on_actionSerial_settings_triggered();
 
@@ -37,6 +38,8 @@ public slots:
 private slots:
     void on_soundButton_clicked();
 
+    void on_startButton_clicked();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
@@ -44,5 +47,6 @@ private:
     RESerial*       reSerial = nullptr;
 
     bool connected;
+    bool readyToStart;
 };
 #endif // MAINWINDOW_H

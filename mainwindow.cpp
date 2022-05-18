@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     reSerial = new RESerial(this);
 
     connected = false;
+    readyToStart = false;
     //Warning connections through dll with cmake works only with macroses!
     connect(reSerial, SIGNAL(statusChange(QString)), this,
             SLOT(statusChange(QString)));
@@ -18,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
                              this, SLOT(stateChange(RESerial::ProcessState)));
     connect(reSerial, SIGNAL(newMessage(QString)),
             this, SLOT(newMessage(QString)));
+    connect(reSerial, SIGNAL(settingsReceived(RE_Settings)),
+            this, SLOT(settingsReceived(RE_Settings)));
 }
 
 MainWindow::~MainWindow()
@@ -53,6 +56,12 @@ void MainWindow::newMessage( QString txt)
     ui->plainTextEdit->insertPlainText(txt);
 }
 
+void MainWindow::settingsReceived(RE_Settings set)
+{
+    ui->startButton->setText("Start");
+    readyToStart = true;
+}
+
 void MainWindow::on_actionSerial_settings_triggered()
 {
     serialDialog->show();
@@ -86,5 +95,17 @@ void MainWindow::on_connectButton_clicked()
 void MainWindow::on_soundButton_clicked()
 {
     reSerial->sendCommand(KSound);
+}
+
+
+void MainWindow::on_startButton_clicked()
+{
+    if(readyToStart)
+    {
+        reSerial->sendCommand(KStart);
+        return;
+    }
+    RE_Settings st = {100,100,100,100,100,100};
+    reSerial->sendSettings(st);
 }
 

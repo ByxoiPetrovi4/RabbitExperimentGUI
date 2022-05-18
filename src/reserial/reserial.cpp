@@ -64,6 +64,18 @@ void RESerial::sendCommand(Keywords k)
     serialTimer->start(RES_DEFAULT_RESEND_INTERVAL);
 }
 
+void RESerial::sendSettings(RE_Settings st)
+{
+    char buf[64];
+    buf[0] = ':';
+    buf[1] = 's';
+    SettingsToStr(st, buf+2);
+    lastTMessage = QByteArray(buf, strlen(buf));
+    State = AwaitAnswer;
+    write(lastTMessage);
+    serialTimer->start(RES_DEFAULT_RESEND_INTERVAL);
+}
+
 void RESerial::processNC(void)
 //Connection pattern send '~''~''~' and w8 for same answer
 //if after RES_DEFAULT_MAX_FAILS connection not estabileshed then
@@ -98,12 +110,23 @@ void RESerial::processAA(void)
     if(!canReadLine())return;
     char buf[64];
     uint16_t len = readLine(buf, 64);
+    qDebug() << buf;
     __re_abstract_data proc_data = process_message(buf,len);
     if(proc_data.typ == DTAnswer)
     {
-        if(memcmp(buf+1, lastTMessage.data()+1, len))return;
+        if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
         State = AwaitEvent;
         serialTimer->stop();
+    }
+    if(proc_data.typ >= DTSettings)
+    {
+        if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
+        State = AwaitEvent;
+        serialTimer->stop();
+        emit settingsReceived(Settings);
+        qDebug() << "Settings is read";
+        //add .log output
+        return;
     }
     if(proc_data.typ == DTError)
     {

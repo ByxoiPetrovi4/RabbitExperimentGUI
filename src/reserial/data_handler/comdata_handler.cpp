@@ -1,7 +1,7 @@
 #include "data_handler.h"
-#include <cstring>
 
 char output_buffer[RE_BUFFER_SIZE];
+re_time experiment_start = 0;
 
 __re_abstract_data process_message(const char* msg, const uint16_t len)
 {
@@ -78,6 +78,9 @@ __re_abstract_data process_answer(const char* str, uint16_t& pos, const uint16_t
     output.typ = DTAnswer;
     switch(str[pos])
     {
+    case KSettings:
+        output.typ = DTSettings;
+        break;
     case KSound:
         strcpy(output_buffer, "Sound");
         output.len = strlen(output_buffer);
@@ -95,6 +98,7 @@ __re_abstract_data process_answer(const char* str, uint16_t& pos, const uint16_t
         output.len = strlen(output_buffer);
         break;
     case KStart:
+        if(experiment_start==0)experiment_start = GetTimeStamp();
         strcpy(output_buffer, "Start");
         output.len = strlen(output_buffer);
         break;
@@ -150,6 +154,30 @@ RE_DataType ToRE_DataType(const char s)
             return DTUndef;
     }
     return DTUndef;
+}
+
+RE_Settings StrToSettings(const char* input)
+{
+    RE_Settings out;
+    sscanf(input, "%*[$]%d%*[$]%d%*[$]%d%*[$]%d%*[$]%d%*[$]%d", &out.food,
+            &out.press_interval, &out.sound_length, &out.manual, &out.min_delay,
+            &out.max_delay);
+    return out;
+}
+
+void SettingsToStr(RE_Settings settings, char* output)
+{
+    sprintf(output, "$%d$%d$%d$%d$%d$%d\n", settings.food,
+            settings.press_interval, settings.sound_length, settings.manual,
+            settings.min_delay,  settings.max_delay);
+}
+
+RE_Settings ToSettings(__re_abstract_data dat)
+{
+    RE_Settings out = {0,0,0,0,0,0};
+    if(dat.typ != DTSettings)return out;
+    memcpy(&out, dat.dat, dat.len);
+    return out;
 }
 
 re_time GetTimeStamp()
