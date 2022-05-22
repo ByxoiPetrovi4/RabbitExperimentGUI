@@ -135,7 +135,7 @@ void RESerial::processAA(void)
         return;
     }
     retimeToStr(GetTimeStamp(), 0, buf);
-    newMessage(tr(ToStr(proc_data)) + " " + buf + "\n");
+    newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
 }
 
 void RESerial::processAE(void)
@@ -155,7 +155,8 @@ void RESerial::processAE(void)
         //redact and add writing to .log
         return;
     }
-    newMessage(tr(ToStr(proc_data)) + "\n");
+    retimeToStr(GetTimeStamp(), 0, buf);
+    newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
 }
 
 void RESerial::dataProcess()

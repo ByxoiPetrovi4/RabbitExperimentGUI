@@ -1,20 +1,30 @@
 #ifndef RE_PROTOCOL
 #define RE_PROTOCOL
+//#define _CONTROLLER_
+#define _MASTER_
 
-#include <cstdint>
-#include <cstring>
-#include <cmath>
+#ifdef _CONTROLLER_
+#include <stdint.h>
+#include <string.h>
+#include <math.h>
+#endif
 
+#ifdef _MASTER_
 //#include "setup_header.h"
+#include <cstdio>
+#include <cstring>
+#include <cstdint>
+#include <ctime>
+#endif
 
 struct RE_Settings
 {
-    uint16_t    food;
-    uint32_t    press_interval;
-    uint32_t    sound_length;
-    uint8_t     manual;
-    uint32_t    min_delay;
-    uint32_t    max_delay;
+    int    food;
+    int    press_interval;
+    int    sound_length;
+    int    manual;
+    int    min_delay;
+    int    max_delay;
 };
 
 #define ER_START_COMMUNICATION '~'
@@ -27,7 +37,7 @@ struct RE_Settings
 enum Keywords : char
 {
     KSettings    = 's',
-    KSound       = 'b',
+    KBeep        = 'b',
     KPause       = 'p',
     KFeed        = 'f',
     KEFeed       = 'e',
@@ -43,9 +53,11 @@ enum Keywords : char
 enum Events : char
 //symbols use after Event '&' as indicator of event
 {
-    ESound      = 'b',
+    EBeep       = 'b',
     EDrop       = 'd',
     EPress      = 'x',
+    EIncPress   = 'i',
+    ENoPress    = 'n',
     ETimeout    = 'y',
     ECorrect    = 'z'
 };
@@ -74,5 +86,27 @@ enum SSymbols : char
 //Error on reading second data packet received error = 2
 //R: :c\n               T: ;c\n
 //Command end is received from microcontroller, GUI will stop records
+
+#ifdef _CONTROLLER_
+//eEvent use in controller state machine:
+// ENothing = no event, EPause | EAnswer = pause answer to master required
+// ESound = sound event "&b\n" send to master
+// ESound | EAnswer = command reseved from master answer required ";b\n"
+typedef enum : char
+{
+  CENothing,
+  CEConnected,
+  CEStart,
+  CEManualTraining,
+  CEAutoTraining,
+  CEPedal,
+  CEDrop,
+  CEFeed,
+  CEPause,
+  CESound,
+  CEEnd,
+  CEAnswer = 0x40
+} eEvent;
+#endif
 
 #endif

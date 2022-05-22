@@ -11,9 +11,9 @@ using namespace cv;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Mat src;
+    /*Mat src;
         // use default camera as video source
-        /*VideoCapture cap(0, CAP_DSHOW);
+        VideoCapture cap(0, CAP_DSHOW);
         // check if we succeeded
         if (!cap.isOpened()) {
             cerr << "ERROR! Unable to open camera\n";
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         cap.set(CAP_PROP_FRAME_WIDTH, 1920);
         cap.set(CAP_PROP_FRAME_HEIGHT, 1080);
         qDebug() << int(cap.get(CAP_PROP_FPS));
-        cap.set(CAP_PROP_FPS, 60.0);
+        cap.set(CAP_PROP_FPS, 30.0);
         cap.set(CAP_PROP_AUTOFOCUS, true);
         int ccodec = cap.get(CAP_PROP_FOURCC);
         // get one frame from camera to know frame size and type
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         bool isColor = (src.type() == CV_8UC3);
         //--- INITIALIZE VIDEOWRITER
         VideoWriter writer;
-        double fps = 50.0;                          // framerate of the created video stream
+        double fps = 22.0;                          // framerate of the created video stream
         string filename = "./live.avi";             // name of the output video file
         writer.open(filename, codec, fps, src.size(), isColor);
         cap.set(CAP_PROP_BUFFERSIZE, 128);

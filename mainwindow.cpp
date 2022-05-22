@@ -99,7 +99,7 @@ void MainWindow::on_connectButton_clicked()
 
 void MainWindow::on_soundButton_clicked()
 {
-    reSerial->sendCommand(KSound);
+    reSerial->sendCommand(KBeep);
 }
 
 

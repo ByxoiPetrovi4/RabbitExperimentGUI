@@ -1,7 +1,7 @@
 #include "data_handler.h"
 
-char output_buffer[RE_BUFFER_SIZE];
-re_time experiment_start = 0;
+static char output_buffer[RE_BUFFER_SIZE];
+static re_time experiment_start = 0;
 
 __re_abstract_data process_message(const char* msg, const uint16_t len)
 {
@@ -39,7 +39,7 @@ __re_abstract_data process_event(const char* str, uint16_t &pos,
     output.typ = DTEvent;
     switch(str[pos])
     {
-        case ESound:
+        case EBeep:
             strcpy(output_buffer, "Sound");
             output.len = strlen(output_buffer);
             break;
@@ -49,6 +49,14 @@ __re_abstract_data process_event(const char* str, uint16_t &pos,
             break;
         case EPress:
             strcpy(output_buffer, "Press");
+            output.len = strlen(output_buffer);
+            break;
+        case EIncPress:
+            strcpy(output_buffer, "Wrong press");
+            output.len = strlen(output_buffer);
+            break;
+        case ENoPress:
+            strcpy(output_buffer, "No Press");
             output.len = strlen(output_buffer);
             break;
         case ETimeout:
@@ -81,7 +89,7 @@ __re_abstract_data process_answer(const char* str, uint16_t& pos, const uint16_t
     case KSettings:
         output.typ = DTSettings;
         break;
-    case KSound:
+    case KBeep:
         strcpy(output_buffer, "Sound");
         output.len = strlen(output_buffer);
         break;
