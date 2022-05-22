@@ -6,6 +6,7 @@ find_package(Qt6 COMPONENTS Widgets)
 
 set(RABBITDIAG_PROJECT rabbitdiag.cpp
     rabbitdiag.h
+    protocol.h
     rabbitdiag.ui)
 
 qt_add_library(RabbitDiag

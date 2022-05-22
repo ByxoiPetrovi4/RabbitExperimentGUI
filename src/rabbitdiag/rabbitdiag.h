@@ -2,7 +2,16 @@
 #define RabbitDIAG_H
 
 #include <QDialog>
+#include <QFileDialog>
 #include <QDateTime>
+#include <QDate>
+#include <QTime>
+#include <iostream>
+#include <cerrno>
+#include "protocol.h"
+
+#define CONFIG_FILENAME "rediag.cfg"
+#define NEW_ITEM_SYMBOL '#'
 
 namespace Ui {
 class RabbitDiag;
@@ -13,26 +22,22 @@ class RabbitDiag : public QDialog
     Q_OBJECT
 
 public:
-    struct Settings {
-        QString     worker_name;
-        QString     actor_name;
-        QString     spectator_name;
-        bool        learning_mode;
-        qint32      actor_weight;
-        qint32      spectator_weight;
-        QDateTime   date;
-    };
     explicit RabbitDiag(QWidget *parent = nullptr);
     ~RabbitDiag();
 
-    Settings settings() const;
+    Info_Settings settings();
+
+private slots:
+    void on_setupTimeButton_clicked();
 
 private:
     void updateSettings();
 
 private:
     Ui::RabbitDiag *ui;
-    Settings currentSettings;
+    Info_Settings currentSettings;
 };
+
+void QStringToCStr(const QString, char*, size_t);
 
 #endif // RabbitDIAG_H

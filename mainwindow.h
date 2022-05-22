@@ -40,6 +40,8 @@ private slots:
 
     void on_startButton_clicked();
 
+    void on_actionSave_at_triggered();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
@@ -48,5 +50,6 @@ private:
 
     bool connected;
     bool readyToStart;
+    char save_directory[128];
 };
 #endif // MAINWINDOW_H

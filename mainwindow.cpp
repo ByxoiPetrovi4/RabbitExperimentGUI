@@ -120,3 +120,13 @@ void MainWindow::on_startButton_clicked()
     reSerial->sendSettings(st);
 }
 
+
+void MainWindow::on_actionSave_at_triggered()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                 "\\",
+                                                 QFileDialog::ShowDirsOnly
+                                                 | QFileDialog::DontResolveSymlinks);
+    QStringToCStr(dir, save_directory, 128);
+}
+
