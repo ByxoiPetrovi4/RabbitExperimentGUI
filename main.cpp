@@ -8,6 +8,8 @@
 using namespace std;
 using namespace cv;
 
+CameraWriter::CameraSettings cwSet;
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -72,6 +74,10 @@ int main(int argc, char *argv[])
                 break;
         }*/
     MainWindow w;
+    wrwindow wrw;
+    wrw.show();
     w.show();
-    return a.exec();
+    int ret = a.exec();
+    //cw.join();
+    return ret;
 }

@@ -130,3 +130,9 @@ void MainWindow::on_actionSave_at_triggered()
     QStringToCStr(dir, save_directory, 128);
 }
 
+
+void MainWindow::on_actionVideo_settings_triggered()
+{
+
+}
+

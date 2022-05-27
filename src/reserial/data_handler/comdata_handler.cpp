@@ -191,7 +191,7 @@ RE_Settings ToSettings(__re_abstract_data dat)
 re_time GetTimeStamp()
 {
     struct timeval tv;
-    mingw_gettimeofday(&tv,NULL);
+    gettimeofday(&tv,NULL);
     return tv.tv_sec*(uint64_t)1000000+tv.tv_usec;
 }
 

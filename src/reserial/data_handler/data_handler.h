@@ -23,6 +23,8 @@ struct RE_OutputFiles
     FILE* mainLog;
 };
 
+#include <dirent.h>
+
 #endif
 
 enum RE_DataType : char
@@ -75,7 +77,7 @@ __re_abstract_data process_error(const char*, uint16_t&,
 #ifdef _MASTER_
 //**************File data processing**************//
 
-RE_OutputFiles open_folder(const char*);
+RE_OutputFiles open_folder(const char*, const char*);
 
 void write_data(__re_abstract_data,
                 const RE_OutputFiles);

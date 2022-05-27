@@ -3,3 +3,5 @@
 add_subdirectory(rabbitdiag)
 
 add_subdirectory(reserial)
+
+add_subdirectory(wrcamera)

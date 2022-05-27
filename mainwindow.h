@@ -9,6 +9,7 @@
 #include "rabbitdiag.h"
 #include "data_handler.h"
 #include "reserial.h"
+#include "wrwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,6 +42,8 @@ private slots:
     void on_startButton_clicked();
 
     void on_actionSave_at_triggered();
+
+    void on_actionVideo_settings_triggered();
 
 private:
     Ui::MainWindow *ui = nullptr;

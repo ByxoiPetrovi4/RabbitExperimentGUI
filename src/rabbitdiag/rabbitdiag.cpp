@@ -28,6 +28,7 @@ RabbitDiag::RabbitDiag(QWidget *parent) :
         ch = fgetc(cfgFile))
     {
        fgets(buf, 64, cfgFile);
+       buf[strlen(buf)-1] = 0;
        ui->workerName->addItem(QString(buf));
        //ui->workerName->setItemData(i, Qt::AlignVCenter, Qt::TextAlignmentRole);
     }
@@ -36,6 +37,7 @@ RabbitDiag::RabbitDiag(QWidget *parent) :
           ch = fgetc(cfgFile))
     {
        fgets(buf, 64, cfgFile);
+       buf[strlen(buf)-1] = 0;
        ui->actorName->addItem(QString(buf));
        //ui->actorName->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
     }
@@ -44,6 +46,7 @@ RabbitDiag::RabbitDiag(QWidget *parent) :
           ch = fgetc(cfgFile))
     {
        fgets(buf, 64, cfgFile);
+       buf[strlen(buf)-1] = 0;
        ui->spectatorName->addItem(QString(buf));
        //ui->spectatorName->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
     }
