@@ -4,10 +4,7 @@ using namespace cv;
 
 CameraWriter::CameraWriter()
 {
-    writing = false;
-    displaying = false;
-    end = false;
-    workingDir[0] = '\0';
+
 }
 
 CameraWriter::CameraWriter(CameraSettings st) : CameraWriter()
@@ -28,14 +25,17 @@ CameraWriter::~CameraWriter()
 
 void CameraWriter::write(const bool &flag)
 {
+    if(flag == writing)return;
     if(!writing && flag)
     {
+        allframes += wframes;
         wframes = 0;
         writing = flag;
         writing_start = GetTimeStamp();
         return;
     }
     writing = flag;
+    writing_stop += GetTimeStamp() - writing_start;
 }
 
 void CameraWriter::display(const bool &flag)
@@ -57,7 +57,13 @@ void CameraWriter::run()
 {
     Mat src;
     frameOut.open("video_log.txt", std::ios::out | std::ios::app);
-    VideoCapture cap(3, CAP_V4L2);
+    VideoCapture cap(2, CAP_V4L2);
+    writing = false;
+    displaying = false;
+    allframes = 0;
+    end = false;
+    workingDir[0] = '\0';
+    writing_stop = 0;
     // check if we succeeded
     if (!cap.isOpened()) {
         std::cerr << "ERROR! Unable to open camera\n";
@@ -91,12 +97,12 @@ void CameraWriter::run()
         return ;
     }
     re_time ls=GetTimeStamp();
-    re_time ct;
+    re_time ct=ls;
     re_time frame_time = 1000000 / fps;
     uint16_t _fps = 0;
     uint64_t writed_frames = 0;
     //--- GRAB AND WRITE LOOP
-    for (;!end;ct=GetTimeStamp())
+    for (;!end;)
     {
         // check if we succeeded
         if (!cap.read(src)) {
@@ -104,6 +110,7 @@ void CameraWriter::run()
             break;
         }
         _fps++;
+        ct=GetTimeStamp();
         if(ct-ls>1000000)
         {
             emit fpsRate(tr("FPS = ") + QString::number(_fps));
@@ -117,6 +124,8 @@ void CameraWriter::run()
             {
                 wframes++;
                 writer.write(src);
+                frameOut << allframes+wframes << "; " << writing_stop + ct - writing_start
+                         << "\n";
             }
         }
         QImage qOriginalImage((uchar*)src.data, src.cols,

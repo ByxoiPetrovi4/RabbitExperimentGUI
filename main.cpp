@@ -4,6 +4,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <mutex>
 
 using namespace std;
 using namespace cv;
@@ -73,9 +74,9 @@ int main(int argc, char *argv[])
             if (waitKey(1) >= 0)
                 break;
         }*/
-    MainWindow w;
-    wrwindow wrw;
-    wrw.show();
+    CameraWriter cw;
+    wrwindow wrw(&cw);
+    MainWindow w(&cw, &wrw);
     w.show();
     int ret = a.exec();
     //cw.join();

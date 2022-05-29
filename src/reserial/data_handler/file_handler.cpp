@@ -5,11 +5,11 @@ RE_OutputFiles open_folder(const char* directory, const char* subdirectory)
     char buf[256];
     if(opendir(directory)==0)return {0,0,0};
     RE_OutputFiles ret;
-    sprintf(buf, "%s/%s/%s", directory, subdirectory, RE_DEFAULT_LOG_FILENAME);
+    snprintf(buf, 256, "%s/%s/%s", directory, subdirectory, RE_DEFAULT_LOG_FILENAME);
     ret.mainLog = fopen(buf, "w");
-    sprintf(buf, "%s/%s/%s", directory, subdirectory, RE_DEFAULT_SETTINGS_FILENAME);
+    snprintf(buf, 256, "%s/%s/%s", directory, subdirectory, RE_DEFAULT_SETTINGS_FILENAME);
     ret.settingsFile = fopen(buf, "w");
-    sprintf(buf, "%s/%s/%s", directory, subdirectory, RE_DEFAULT_SETTINGS_FILENAME);
+    snprintf(buf, 256, "%s/%s/%s", directory, subdirectory, RE_DEFAULT_SETTINGS_FILENAME);
     ret.dataFile = fopen(buf, "w");
     return ret;
 }

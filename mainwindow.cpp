@@ -1,11 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    cameraWindow = wrw;
+    cmwr = cw;
     serialDialog = new SerialDiag(this);
     rabbitDialog = new RabbitDiag(this);
     reSerial = new RESerial(this);
@@ -134,5 +136,12 @@ void MainWindow::on_actionSave_at_triggered()
 void MainWindow::on_actionVideo_settings_triggered()
 {
 
+}
+
+
+void MainWindow::on_cameraButton_clicked()
+{
+    cmwr->start();
+    cameraWindow->show();
 }
 

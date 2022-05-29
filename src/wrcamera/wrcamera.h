@@ -31,7 +31,9 @@ private:
     bool end;
     bool writing;
     re_time writing_start;
+    re_time writing_stop;
     uint64_t wframes;
+    uint64_t allframes;
     bool displaying;
     char workingDir[128];
 

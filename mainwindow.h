@@ -20,7 +20,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(CameraWriter*, wrwindow*, QWidget *parent = nullptr);
     ~MainWindow();
     void showStatusMessage(const QString &);
 
@@ -45,11 +45,15 @@ private slots:
 
     void on_actionVideo_settings_triggered();
 
+    void on_cameraButton_clicked();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
     RabbitDiag*     rabbitDialog = nullptr;
     RESerial*       reSerial = nullptr;
+    CameraWriter*   cmwr = nullptr;
+    wrwindow*       cameraWindow = nullptr;
 
     bool connected;
     bool readyToStart;
