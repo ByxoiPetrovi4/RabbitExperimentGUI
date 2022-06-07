@@ -59,7 +59,13 @@ void MainWindow::stateChange(RESerial::ProcessState st)
 void MainWindow::newMessage( QString txt)
 {
     ui->plainTextEdit->moveCursor(QTextCursor::End);
-    ui->plainTextEdit->insertPlainText(txt);
+    if(txt.count(' ')<2)
+    {
+        ui->plainTextEdit->insertPlainText(txt);
+        return;
+    }
+    //check for enum output, if it's there than don't show enum
+    ui->plainTextEdit->insertPlainText(txt.section(' ', 0, 1) + "\n");
 }
 
 void MainWindow::settingsReceived(RE_Settings set)
@@ -109,6 +115,7 @@ void MainWindow::on_startButton_clicked()
 {
     if(readyToStart)
     {
+        reSerial->writeExpInfo(rabbitDialog->settings());
         reSerial->sendCommand(KStart);
         return;
     }
@@ -125,11 +132,12 @@ void MainWindow::on_startButton_clicked()
 
 void MainWindow::on_actionSave_at_triggered()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+    saveDirectory = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                  "\\",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
-    QStringToCStr(dir, save_directory, 128);
+    reSerial->setWorkDir(saveDirectory, QDateTime::currentDateTime().toString(Qt::ISODate) +
+                         "_" + rabbitDialog->getSubdirectory());
 }
 
 
@@ -143,5 +151,11 @@ void MainWindow::on_cameraButton_clicked()
 {
     cmwr->start();
     cameraWindow->show();
+}
+
+
+void MainWindow::on_feedButton_clicked()
+{
+    reSerial->sendCommand(KFeed);
 }
 

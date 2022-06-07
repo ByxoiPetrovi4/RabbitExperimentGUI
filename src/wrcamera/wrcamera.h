@@ -39,7 +39,7 @@ private:
 
     void run() override;
 signals:
-    void newFrame(const QPixmap&);
+    void newFrame(const QImage&);
     void fpsRate(const QString&);
 public slots:
     void write(const bool&);

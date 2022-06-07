@@ -47,6 +47,8 @@ private slots:
 
     void on_cameraButton_clicked();
 
+    void on_feedButton_clicked();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
@@ -57,6 +59,6 @@ private:
 
     bool connected;
     bool readyToStart;
-    char save_directory[128];
+    QString saveDirectory;
 };
 #endif // MAINWINDOW_H

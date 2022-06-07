@@ -57,7 +57,7 @@ void CameraWriter::run()
 {
     Mat src;
     frameOut.open("video_log.txt", std::ios::out | std::ios::app);
-    VideoCapture cap(2, CAP_V4L2);
+    VideoCapture cap(0, CAP_V4L2);
     writing = false;
     displaying = false;
     allframes = 0;
@@ -131,7 +131,7 @@ void CameraWriter::run()
         QImage qOriginalImage((uchar*)src.data, src.cols,
             src.rows, src.step, QImage::Format_RGB888);
 
-        if(displaying) emit newFrame(QPixmap::fromImage(qOriginalImage));
+        if(displaying) emit newFrame(qOriginalImage);
     }
     writer.release();
     frameOut.close();

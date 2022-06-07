@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QImage>
 #include <thread>
 #include <mutex>
 #include "wrcamera.h"
@@ -23,6 +24,7 @@ private slots:
     void on_writeButton_clicked();
     void closeEvent(QCloseEvent*) override;
     void on_displayCBox_stateChanged(int arg1);
+    void frameUpdate(const QImage&);
 
 private:
     Ui::wrwindow *ui;

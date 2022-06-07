@@ -1,5 +1,12 @@
 #include "reserial.h"
 
+inline void QStringToCStr(const QString qstr, char* cstr, size_t max_size)
+{
+    QByteArray tmp = qstr.toLatin1();
+    strncpy(cstr, tmp.data(), max_size);
+    cstr[max_size] = '\0';
+}
+
 RESerial::RESerial(QObject *parent)
     : QSerialPort{parent}
 {
@@ -19,8 +26,21 @@ RESerial::RESerial(QObject *parent)
     State = NoConnect;
 }
 
+RESerial::~RESerial()
+{
+    delete serialTimer;
+    closeOutput();
+    Disconnect();
+}
+
 void RESerial::Connect(const SerialDiag::Settings st)
 {
+    try {
+        openOutput();
+    }  catch (QString out) {
+        QMessageBox::critical(0, tr("Error"), out);
+        emit statusChange(out);
+    }
     setPortName(st.name);
     setBaudRate(st.baudRate);
     setDataBits(st.dataBits);
@@ -52,6 +72,50 @@ void RESerial::Disconnect()
     emit statusChange(tr("Disconnected"));
     serialTimer->stop();
     State = NoConnect;
+}
+
+void RESerial::openOutput()
+{
+    char bufDir[127];
+    char bufSubDir[127];
+    QStringToCStr(workDirectory, bufDir, 127);
+    QStringToCStr(subDirectory, bufSubDir, 127);
+    openFiles = open_folder(bufDir, bufSubDir);
+    if(openFiles.dataFile == 0 || openFiles.settingsFile == 0 || openFiles.mainLog == 0)
+    {
+        throw tr("RE couldn't open output files!\n");
+    }
+}
+
+void RESerial::closeOutput()
+{
+    if(openFiles.dataFile!=0)fclose(openFiles.dataFile);
+    if(openFiles.mainLog!=0)fclose(openFiles.mainLog);
+    if(openFiles.settingsFile!=0)fclose(openFiles.settingsFile);
+}
+
+void RESerial::writeExpInfo(const Info_Settings ist)
+{
+    fprintf(openFiles.settingsFile, "#Food: %u\n", Settings.food);
+    fprintf(openFiles.settingsFile, "#Manual: %c\n", Settings.manual ? 'Y' : 'N');
+    fprintf(openFiles.settingsFile, "#Max delay: %u\n", Settings.max_delay);
+    fprintf(openFiles.settingsFile, "#Min delay: %u\n", Settings.min_delay);
+    fprintf(openFiles.settingsFile, "#Press interval: %u\n", Settings.press_interval);
+    fprintf(openFiles.settingsFile, "#Sound length: %u\n\n", Settings.sound_length);
+
+    fprintf(openFiles.settingsFile, "#Actor: %s\n", ist.actorName);
+    fprintf(openFiles.settingsFile, "#Actor weight: %u\n", ist.actorWeight);
+    fprintf(openFiles.settingsFile, "#Spectator: %s\n", ist.spectatorName);
+    fprintf(openFiles.settingsFile, "#Spectators weight: %u\n", ist.spectatorWeight);
+    fprintf(openFiles.settingsFile, "#Worker's name: %s\n", ist.workerName);
+    fprintf(openFiles.settingsFile, "#Date: %s\n", ist.date);
+    fprintf(openFiles.settingsFile, "#Mode: %c\n", ist.learning ? 'L' : 'E');
+}
+
+void RESerial::setWorkDir(const QString &wd, const QString &sd)
+{
+    workDirectory = wd;
+    subDirectory = sd;
 }
 
 void RESerial::sendCommand(Keywords k)
@@ -107,35 +171,50 @@ void RESerial::processAA(void)
 //occures only after command send.
 //Awaiting to receive same last transmitted message
 {
-    if(!canReadLine())return;
-    char buf[64];
-    uint16_t len = readLine(buf, 64);
-    qDebug() << buf;
-    __re_abstract_data proc_data = process_message(buf,len);
-    if(proc_data.typ == DTAnswer)
+    while(canReadLine())
     {
-        if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
-        State = AwaitEvent;
-        serialTimer->stop();
+        char buf[64];
+        uint16_t len = readLine(buf, 64);
+        qDebug() << buf;
+        fputs(buf, openFiles.mainLog);
+        __re_abstract_data proc_data = process_message(buf,len);
+        if(proc_data.typ == DTAnswer)
+        {
+            if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
+            State = AwaitEvent;
+            serialTimer->stop();
+        }
+        if(proc_data.typ >= DTSettings)
+        {
+            if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
+            State = AwaitEvent;
+            serialTimer->stop();
+            emit settingsReceived(Settings);
+            qDebug() << "Settings is read";
+            //add .log output
+            return;
+        }
+        if(proc_data.typ == DTError)
+        {
+            emit statusChange(tr(ToStr(proc_data)));
+            serialTimer->stop();
+            State = AwaitEvent;
+            //redact and add writing to .log
+            return;
+        }
+        if(proc_data.typ == DTComment)
+        {
+            retimeToStr(GetTimeStamp(), 0, buf);
+            newMessage(tr(buf) + " " + ToStr(proc_data));
+            return;
+        }
+        retimeToStr(GetTimeStamp(), 0, buf);
+        fputs(buf, openFiles.dataFile);
+        fputc(' ', openFiles.dataFile);
+        fputs(ToStr(proc_data), openFiles.dataFile);
+        fputc('\n', openFiles.dataFile);
+        newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
     }
-    if(proc_data.typ >= DTSettings)
-    {
-        if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
-        State = AwaitEvent;
-        serialTimer->stop();
-        emit settingsReceived(Settings);
-        qDebug() << "Settings is read";
-        //add .log output
-        return;
-    }
-    if(proc_data.typ == DTError)
-    {
-        emit statusChange(tr(ToStr(proc_data)));
-        //redact and add writing to .log
-        return;
-    }
-    retimeToStr(GetTimeStamp(), 0, buf);
-    newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
 }
 
 void RESerial::processAE(void)
@@ -144,19 +223,32 @@ void RESerial::processAE(void)
 //awaiting resending for the previous message.
 //if all correct state doesn't change.
 {
-    if(!canReadLine())return;
-    char buf[64];
-    uint16_t len = readLine(buf, 64);
-    qDebug() << buf << '\n';
-    __re_abstract_data proc_data = process_message(buf,len);
-    if(proc_data.typ == DTError)
+    while(canReadLine())
     {
-        emit statusChange(tr(ToStr(proc_data)));
-        //redact and add writing to .log
-        return;
+        char buf[64];
+        uint16_t len = readLine(buf, 64);
+        qDebug() << buf;
+        fputs(buf, openFiles.mainLog);
+        __re_abstract_data proc_data = process_message(buf,len);
+        if(proc_data.typ == DTError)
+        {
+            emit statusChange(tr(ToStr(proc_data)));
+            //redact and add writing to .log
+            return;
+        }
+        if(proc_data.typ == DTComment)
+        {
+            retimeToStr(GetTimeStamp(), 0, buf);
+            newMessage(tr(buf) + " " + ToStr(proc_data));
+            return;
+        }
+        retimeToStr(GetTimeStamp(), 0, buf);
+        fputs(buf, openFiles.dataFile);
+        fputc(' ', openFiles.dataFile);
+        fputs(ToStr(proc_data), openFiles.dataFile);
+        fputc('\n', openFiles.dataFile);
+        newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
     }
-    retimeToStr(GetTimeStamp(), 0, buf);
-    newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
 }
 
 void RESerial::dataProcess()

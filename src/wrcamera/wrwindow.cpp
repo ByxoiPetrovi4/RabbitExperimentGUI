@@ -7,8 +7,8 @@ wrwindow::wrwindow(CameraWriter* cw, QWidget *parent) :
 {
     ui->setupUi(this);
     camwr = cw;
-    connect(camwr, SIGNAL(newFrame(const QPixmap&)), ui->label,
-            SLOT(setPixmap(const QPixmap&)));
+    connect(camwr, SIGNAL(newFrame(const QImage&)), this,
+            SLOT(frameUpdate(const QImage&)));
     connect(camwr, SIGNAL(fpsRate(const QString&)), ui->fpsLabel,
             SLOT(setText(const QString&)));
     //connect(this, SIGNAL(close()), &camwr, SLOT(stop()));
@@ -51,3 +51,8 @@ void wrwindow::on_writeButton_clicked()
     ui->writeButton->setText("Stop");
 }
 
+void wrwindow::frameUpdate(const QImage& img)
+{
+    QPixmap t = QPixmap::fromImage(img);
+    ui->label->setPixmap(t.scaled(640, 360, Qt::KeepAspectRatio));
+}

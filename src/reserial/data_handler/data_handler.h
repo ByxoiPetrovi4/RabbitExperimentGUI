@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <cstdio>
 #include <cstring>
-#include <sys/time.h>
 
 #define _MASTER_
 #ifdef _MASTER_
@@ -24,6 +23,9 @@ struct RE_OutputFiles
 };
 
 #include <dirent.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #endif
 
@@ -116,12 +118,12 @@ eEvent ToeEvent(__re_abstract_data);
 #endif
 
 const RE_DataProcess _re_process_funcs[] = {
-    process_event, process_answer, process_command, process_error};
+    process_event, process_answer, process_command, process_comment, process_error};
 
 #ifdef _MASTER_
 
 const RE_DataWrite _re_write_funcs[] = {
-    write_event, write_answer, write_command, write_error};
+    write_event, write_answer, write_command, write_comment, write_error};
 
 #endif
 

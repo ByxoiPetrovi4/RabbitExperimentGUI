@@ -1,7 +1,7 @@
 #include "rabbitdiag.h"
 #include "ui_rabbitdiag.h"
 
-void QStringToCStr(const QString qstr, char* cstr, size_t max_size)
+inline void QStringToCStr(const QString qstr, char* cstr, size_t max_size)
 {
     QByteArray tmp = qstr.toLatin1();
     strncpy(cstr, tmp.data(), max_size);
@@ -62,16 +62,24 @@ Info_Settings RabbitDiag::settings()
 {
     currentSettings.learning = ui->learningCheck->isChecked();
     QStringToCStr(ui->actorName->currentText(),
-                  currentSettings.actorName, 64);
+                  currentSettings.actorName, 32);
     QStringToCStr(ui->spectatorName->currentText(),
-                  currentSettings.spectatorName, 64);
+                  currentSettings.spectatorName, 32);
     QStringToCStr(ui->workerName->currentText(),
-                  currentSettings.workerName, 64);
+                  currentSettings.workerName, 32);
     QStringToCStr(ui->experimentDate->date().toString(),
-                  currentSettings.date, 64);
+                  currentSettings.date, 32);
     currentSettings.actorWeight = ui->actorWeight->value();
     currentSettings.spectatorWeight = ui->spectatorWeight->value();
     return currentSettings;
+}
+
+QString RabbitDiag::getSubdirectory()
+{
+    settings();
+    QString out = tr("%1_%2_%3").arg(tr(currentSettings.spectatorName))
+                .arg(tr(currentSettings.actorName)).arg(currentSettings.learning ? 'l' : 'e');
+    return out;
 }
 
 void RabbitDiag::on_setupTimeButton_clicked()

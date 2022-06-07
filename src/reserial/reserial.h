@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QtDebug>
 #include <QThread>
+#include <QDate>
 
 #include "serialdiag.h"
 #include "protocol.h"
@@ -28,15 +29,19 @@ public:
     enum ProcessState {NoConnect, AwaitAnswer, AwaitEvent};
 
     explicit RESerial(QObject *parent = nullptr);
+    ~RESerial();
 
     void Connect(const SerialDiag::Settings);
     void Disconnect();
 
-    void OpenOutput(QString);
-    void CloseOutput();
+    void openOutput();
+    void closeOutput();
+    void writeExpInfo(const Info_Settings);
+
+    void setWorkDir(const QString&, const QString&);
 
     RE_Settings settings();
-    void setSettings(const RE_Settings);
+
     void sendCommand(Keywords);
     void sendSettings(RE_Settings);
 
@@ -53,8 +58,11 @@ signals:
     //void endOfFood();
 
 private:
-    RE_Settings Settings;
-    ProcessState State;
+    RE_Settings     Settings;
+    RE_OutputFiles  openFiles;
+    QString         workDirectory;
+    QString         subDirectory;
+    ProcessState    State;
 
     void processNC(void);
     void processAA(void);

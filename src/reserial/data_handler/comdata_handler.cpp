@@ -30,7 +30,7 @@ __re_abstract_data process_event(const char* str, uint16_t &pos,
     output.dat = output_buffer;
     if(str[pos+1] != End || pos + 2 > len)
     {
-        strcpy(output_buffer, "NoEnd");
+        sprintf(output_buffer, "NoEnd");
         output.len = strlen(output_buffer);
         output.typ = DTError;
         pos++;
@@ -40,35 +40,35 @@ __re_abstract_data process_event(const char* str, uint16_t &pos,
     switch(str[pos])
     {
         case EBeep:
-            strcpy(output_buffer, "Sound");
+            sprintf(output_buffer, "Sound %d", (int)EBeep);
             output.len = strlen(output_buffer);
             break;
         case EDrop:
-            strcpy(output_buffer, "Drop");
+            sprintf(output_buffer, "Drop %d", (int)EDrop);
             output.len = strlen(output_buffer);
             break;
         case EPress:
-            strcpy(output_buffer, "Press");
+            sprintf(output_buffer, "Press %d", (int)EPress);
             output.len = strlen(output_buffer);
             break;
         case EIncPress:
-            strcpy(output_buffer, "Wrong press");
+            sprintf(output_buffer, "WrongPress %d", (int)EIncPress);
             output.len = strlen(output_buffer);
             break;
         case ENoPress:
-            strcpy(output_buffer, "No Press");
+            sprintf(output_buffer, "NoPress %d", (int)ENoPress);
             output.len = strlen(output_buffer);
             break;
         case ETimeout:
-            strcpy(output_buffer, "Timeout");
+            sprintf(output_buffer, "Timeout %d", (int)ETimeout);
             output.len = strlen(output_buffer);
             break;
         case ECorrect:
-            strcpy(output_buffer, "Correct");
+            sprintf(output_buffer, "Correct %d", (int)ECorrect);
             output.len = strlen(output_buffer);
             break;
         default:
-            strcpy(output_buffer, "NoEvent");
+            sprintf(output_buffer, "NoEvent -1");
             output.len = strlen(output_buffer);
             output.typ = DTError;
     }
@@ -90,28 +90,28 @@ __re_abstract_data process_answer(const char* str, uint16_t& pos, const uint16_t
         output.typ = DTSettings;
         break;
     case KBeep:
-        strcpy(output_buffer, "Sound");
+        sprintf(output_buffer, "Sound %d", (int)KBeep);
         output.len = strlen(output_buffer);
         break;
     case KPause:
-        strcpy(output_buffer, "Pause");
+        sprintf(output_buffer, "Pause %d", (int)KPause);
         output.len = strlen(output_buffer);
         break;
     case KFeed:
-        strcpy(output_buffer, "Feed");
+        sprintf(output_buffer, "Feed %d", (int)KFeed);
         output.len = strlen(output_buffer);
         break;
     case KEFeed:
-        strcpy(output_buffer, "EFeed");
+        sprintf(output_buffer, "EFeed %d", (int)KEFeed);
         output.len = strlen(output_buffer);
         break;
     case KStart:
         if(experiment_start==0)experiment_start = GetTimeStamp();
-        strcpy(output_buffer, "Start");
+        sprintf(output_buffer, "Start %d", (int)KStart);
         output.len = strlen(output_buffer);
         break;
     case KClose:
-        strcpy(output_buffer, "Close");
+        sprintf(output_buffer, "Close %d", (int)KClose);
         output.len = strlen(output_buffer);
     default:
         output.typ = DTAnswer;
@@ -198,5 +198,5 @@ re_time GetTimeStamp()
 void retimeToStr(const re_time current, const re_time start, char* str)
 {
     re_time t = current - start;
-    sprintf(str, "%llu:%llu:%llu.%llu", (t/3600000000)%24, (t/60000000)%60, (t/1000000)%60, (t/1000)%1000);
+    sprintf(str, "%lu:%lu:%lu.%lu", (t/3600000000)%24, (t/60000000)%60, (t/1000000)%60, (t/1000)%1000);
 }

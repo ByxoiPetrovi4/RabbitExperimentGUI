@@ -26,6 +26,7 @@ public:
     ~RabbitDiag();
 
     Info_Settings settings();
+    QString getSubdirectory();
 
 private slots:
     void on_setupTimeButton_clicked();
