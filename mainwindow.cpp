@@ -173,7 +173,7 @@ void MainWindow::on_pauseButton_clicked()
 
 void MainWindow::on_startButton_clicked()
 {
-    if(readyToStart)
+    if(readyToStart && !experimentActive)
     {
         reSerial->writeExpInfo(rabbitDialog->settings());
         reSerial->sendCommand(KStart);
