@@ -5,6 +5,7 @@
 #include <QString>
 #include <QSerialPort>
 #include <QMessageBox>
+#include <QShortcut>
 #include "serialdiag.h"
 #include "rabbitdiag.h"
 #include "data_handler.h"
@@ -49,6 +50,12 @@ private slots:
 
     void on_feedButton_clicked();
 
+    void on_settingsButton_clicked();
+
+    void on_pauseButton_clicked();
+
+    void on_feedErrorButton_clicked();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
@@ -57,8 +64,17 @@ private:
     CameraWriter*   cmwr = nullptr;
     wrwindow*       cameraWindow = nullptr;
 
+    QShortcut*      hkeyFeed = nullptr;
+    QShortcut*      hkeyEFeed = nullptr;
+    QShortcut*      hkeySound = nullptr;
+    QShortcut*      hkeyPause = nullptr;
+
     bool connected;
     bool readyToStart;
+    bool experimentActive;
     QString saveDirectory;
+
+    void experimentStart();
+    void experimentStop();
 };
 #endif // MAINWINDOW_H

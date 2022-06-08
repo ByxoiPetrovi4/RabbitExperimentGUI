@@ -131,7 +131,15 @@ __re_abstract_data process_comment(const char* str, uint16_t& pos, const uint16_
     output.len = strlen(output_buffer);
     return output;
 }
-__re_abstract_data process_error(const char*, uint16_t&, const uint16_t){}
+__re_abstract_data process_error(const char* str, uint16_t& pos, const uint16_t len)
+{
+    __re_abstract_data output;
+    output.dat = output_buffer;
+    output.typ = DTError;
+    memcpy(output.dat, str, strlen(str));
+    output.len = strlen(output_buffer);
+    return output;
+}
 
 void write_event(const __re_abstract_data, FILE*){}
 void write_answer(const __re_abstract_data, FILE*){}

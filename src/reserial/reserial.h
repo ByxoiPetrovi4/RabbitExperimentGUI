@@ -29,7 +29,6 @@ public:
     enum ProcessState {NoConnect, AwaitAnswer, AwaitEvent};
 
     explicit RESerial(QObject *parent = nullptr);
-    ~RESerial();
 
     void Connect(const SerialDiag::Settings);
     void Disconnect();

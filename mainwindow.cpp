@@ -12,8 +12,29 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
     rabbitDialog = new RabbitDiag(this);
     reSerial = new RESerial(this);
 
+    hkeyFeed = new QShortcut(this);
+    hkeyEFeed = new QShortcut(this);
+    hkeySound = new QShortcut(this);
+    hkeyPause = new QShortcut(this);
+
+    hkeyFeed->setKey(Qt::CTRL | Qt::Key_F);
+    hkeyEFeed->setKey(Qt::CTRL | Qt::Key_M);
+    hkeySound->setKey(Qt::CTRL | Qt::Key_S);
+    hkeyPause->setKey(Qt::CTRL | Qt::Key_P);
+
+    connect(hkeyFeed, SIGNAL(activated()),
+            this, SLOT(on_feedButton_clicked()));
+    connect(hkeyEFeed, SIGNAL(activated()),
+            this, SLOT(on_feedErrorButton_clicked()));
+    connect(hkeySound, SIGNAL(activated()),
+            this, SLOT(on_soundButton_clicked()));
+    connect(hkeyPause, SIGNAL(activated()),
+            this, SLOT(on_pauseButton_clicked()));
+
     connected = false;
     readyToStart = false;
+
+    experimentActive = false;
     //Warning connections through dll with cmake works only with macroses!
     connect(reSerial, SIGNAL(statusChange(QString)), this,
             SLOT(statusChange(QString)));
@@ -23,6 +44,7 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
             this, SLOT(newMessage(QString)));
     connect(reSerial, SIGNAL(settingsReceived(RE_Settings)),
             this, SLOT(settingsReceived(RE_Settings)));
+
 }
 
 MainWindow::~MainWindow()
@@ -71,7 +93,7 @@ void MainWindow::newMessage( QString txt)
 void MainWindow::settingsReceived(RE_Settings set)
 {
     ui->startButton->setText("Start");
-    ui->settingsBox->setEnabled(false);
+    ui->startButton->setEnabled(true);
     readyToStart = true;
 }
 
@@ -84,7 +106,6 @@ void MainWindow::on_actionSerial_settings_triggered()
 void MainWindow::on_actionRecord_settings_triggered()
 {
     rabbitDialog->show();
-
 }
 
 
@@ -96,20 +117,59 @@ void MainWindow::on_connectButton_clicked()
                 "Do you really want to disconnect device?",
                 QMessageBox::Yes|QMessageBox::No) ==
                 QMessageBox::No)return;
+        experimentStop();
         reSerial->Disconnect();
         connected = false;
         ui->connectButton->setText(tr("Connect"));
         return;
     }
-    reSerial->Connect(serialDialog->settings());
-}
+    try {
+        reSerial->Connect(serialDialog->settings());
+        ui->settingsBox->setEnabled(true);
+    }  catch (QString exp) {
 
+    }
+
+}
 
 void MainWindow::on_soundButton_clicked()
 {
+    if(!experimentActive)return;
     reSerial->sendCommand(KBeep);
 }
 
+void MainWindow::on_feedButton_clicked()
+{
+    if(!experimentActive)return;
+    reSerial->sendCommand(KFeed);
+}
+
+void MainWindow::on_feedErrorButton_clicked()
+{
+    if(!experimentActive)return;
+    reSerial->sendCommand(KEFeed);
+}
+
+void MainWindow::on_pauseButton_clicked()
+{
+    reSerial->sendCommand(KPause);
+    if(experimentActive)
+    {
+        experimentActive = false;
+        ui->feedButton->setEnabled(false);
+        ui->soundButton->setEnabled(false);
+        ui->feedErrorButton->setEnabled(false);
+
+        ui->pauseButton->setText("Unpause");
+        return;
+    }
+    experimentActive = true;
+    ui->feedButton->setEnabled(true);
+    ui->soundButton->setEnabled(true);
+    ui->feedErrorButton->setEnabled(true);
+
+    ui->pauseButton->setText("Pause");
+}
 
 void MainWindow::on_startButton_clicked()
 {
@@ -117,16 +177,14 @@ void MainWindow::on_startButton_clicked()
     {
         reSerial->writeExpInfo(rabbitDialog->settings());
         reSerial->sendCommand(KStart);
+        experimentStart();
         return;
     }
-    RE_Settings st;
-    st.food = 100;
-    st.press_interval = ui->pressIntervalSPBox->value()*1000;
-    st.sound_length = 2500;
-    st.manual = ui->manualCheck->isChecked() ? 1 : 0;
-    st.min_delay = ui->minDelaySPBox->value()*1000;
-    st.max_delay = ui->maxDelaySPBox->value()*1000;
-    reSerial->sendSettings(st);
+    if(experimentActive)
+    {
+        reSerial->sendCommand(KClose);
+        experimentStop();
+    }
 }
 
 
@@ -154,8 +212,39 @@ void MainWindow::on_cameraButton_clicked()
 }
 
 
-void MainWindow::on_feedButton_clicked()
+void MainWindow::on_settingsButton_clicked()
 {
-    reSerial->sendCommand(KFeed);
+    RE_Settings st;
+    st.food = ui->foodSPBox->value();
+    st.press_interval = ui->pressIntervalSPBox->value()*1000;
+    st.sound_length = ui->soundLengthSPBox->value()*1000;
+    st.manual = ui->manualCheck->isChecked() ? 1 : 0;
+    st.min_delay = ui->minDelaySPBox->value()*1000;
+    st.max_delay = ui->maxDelaySPBox->value()*1000;
+    reSerial->sendSettings(st);
 }
+
+void MainWindow::experimentStart()
+{
+    experimentActive = true;
+    ui->feedButton->setEnabled(true);
+    ui->soundButton->setEnabled(true);
+    ui->feedErrorButton->setEnabled(true);
+
+    ui->pauseButton->setEnabled(true);
+    ui->startButton->setText("Stop");
+    ui->settingsBox->setEnabled(false);
+}
+
+void MainWindow::experimentStop()
+{
+    experimentActive = false;
+    ui->feedButton->setEnabled(false);
+    ui->soundButton->setEnabled(false);
+    ui->feedErrorButton->setEnabled(false);
+
+    ui->pauseButton->setEnabled(false);
+    ui->startButton->setEnabled(false);
+}
+
 

@@ -26,13 +26,6 @@ RESerial::RESerial(QObject *parent)
     State = NoConnect;
 }
 
-RESerial::~RESerial()
-{
-    delete serialTimer;
-    closeOutput();
-    Disconnect();
-}
-
 void RESerial::Connect(const SerialDiag::Settings st)
 {
     try {
@@ -131,6 +124,7 @@ void RESerial::sendCommand(Keywords k)
 void RESerial::sendSettings(RE_Settings st)
 {
     char buf[64];
+    Settings = st;
     buf[0] = ':';
     buf[1] = 's';
     SettingsToStr(st, buf+2);

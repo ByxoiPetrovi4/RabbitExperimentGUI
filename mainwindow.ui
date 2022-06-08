@@ -65,7 +65,7 @@
         <item>
          <widget class="QPlainTextEdit" name="plainTextEdit">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
             <horstretch>80</horstretch>
             <verstretch>80</verstretch>
            </sizepolicy>
@@ -73,7 +73,7 @@
           <property name="minimumSize">
            <size>
             <width>200</width>
-            <height>200</height>
+            <height>600</height>
            </size>
           </property>
           <property name="verticalScrollBarPolicy">
@@ -119,6 +119,9 @@
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="QPushButton" name="feedButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Feed</string>
               </property>
@@ -126,6 +129,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="feedErrorButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Error Feed</string>
               </property>
@@ -133,6 +139,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="soundButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Sound</string>
               </property>
@@ -140,6 +149,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="pauseButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Pause</string>
               </property>
@@ -147,8 +159,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="startButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
-               <string>Send Settings</string>
+               <string>Start</string>
               </property>
              </widget>
             </item>
@@ -166,7 +181,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>360</height>
+                <height>400</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -184,7 +199,7 @@
                  <x>10</x>
                  <y>30</y>
                  <width>211</width>
-                 <height>321</height>
+                 <height>361</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -286,6 +301,13 @@
                  <widget class="QCheckBox" name="manualCheck">
                   <property name="text">
                    <string>Manual Mode</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="settingsButton">
+                  <property name="text">
+                   <string>Send Settings</string>
                   </property>
                  </widget>
                 </item>
