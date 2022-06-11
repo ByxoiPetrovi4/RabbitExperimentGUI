@@ -89,20 +89,20 @@ void RESerial::closeOutput()
 
 void RESerial::writeExpInfo(const Info_Settings ist)
 {
-    fprintf(openFiles.settingsFile, "#Food: %u\n", Settings.food);
-    fprintf(openFiles.settingsFile, "#Manual: %c\n", Settings.manual ? 'Y' : 'N');
-    fprintf(openFiles.settingsFile, "#Max delay: %u\n", Settings.max_delay);
-    fprintf(openFiles.settingsFile, "#Min delay: %u\n", Settings.min_delay);
-    fprintf(openFiles.settingsFile, "#Press interval: %u\n", Settings.press_interval);
-    fprintf(openFiles.settingsFile, "#Sound length: %u\n\n", Settings.sound_length);
+    fprintf(openFiles.settingsFile, "#Food\n%u\n", Settings.food);
+    fprintf(openFiles.settingsFile, "#Manual\n%c\n", Settings.manual ? 'Y' : 'N');
+    fprintf(openFiles.settingsFile, "#Max delay\n%u\n", Settings.max_delay);
+    fprintf(openFiles.settingsFile, "#Min delay\n%u\n", Settings.min_delay);
+    fprintf(openFiles.settingsFile, "#Press interval\n%u\n", Settings.press_interval);
+    fprintf(openFiles.settingsFile, "#Sound length\n%u\n\n", Settings.sound_length);
 
-    fprintf(openFiles.settingsFile, "#Actor: %s\n", ist.actorName);
-    fprintf(openFiles.settingsFile, "#Actor weight: %u\n", ist.actorWeight);
-    fprintf(openFiles.settingsFile, "#Spectator: %s\n", ist.spectatorName);
-    fprintf(openFiles.settingsFile, "#Spectators weight: %u\n", ist.spectatorWeight);
-    fprintf(openFiles.settingsFile, "#Worker's name: %s\n", ist.workerName);
-    fprintf(openFiles.settingsFile, "#Date: %s\n", ist.date);
-    fprintf(openFiles.settingsFile, "#Mode: %c\n", ist.learning ? 'L' : 'E');
+    fprintf(openFiles.settingsFile, "#Actor\n%s\n", ist.actorName);
+    fprintf(openFiles.settingsFile, "#Actor weight\n%u\n", ist.actorWeight);
+    fprintf(openFiles.settingsFile, "#Spectator\n%s\n", ist.spectatorName);
+    fprintf(openFiles.settingsFile, "#Spectators weight\n%u\n", ist.spectatorWeight);
+    fprintf(openFiles.settingsFile, "#Worker's name\n%s\n", ist.workerName);
+    fprintf(openFiles.settingsFile, "#Date\n%s\n", ist.date);
+    fprintf(openFiles.settingsFile, "#Mode\n%c\n", ist.learning ? 'L' : 'E');
 }
 
 void RESerial::setWorkDir(const QString &wd, const QString &sd)
@@ -114,6 +114,7 @@ void RESerial::setWorkDir(const QString &wd, const QString &sd)
 void RESerial::sendCommand(Keywords k)
 {
     char buf[4] = {Command, k, End, 0};
+    fputs(buf, openFiles.mainLog);
     qDebug() << buf;
     lastTMessage = QByteArray(buf, 3);
     State = AwaitAnswer;
@@ -129,6 +130,7 @@ void RESerial::sendSettings(RE_Settings st)
     buf[1] = 's';
     SettingsToStr(st, buf+2);
     lastTMessage = QByteArray(buf, strlen(buf));
+    fputs(buf, openFiles.mainLog);
     State = AwaitAnswer;
     write(lastTMessage);
     serialTimer->start(RES_DEFAULT_RESEND_INTERVAL);
