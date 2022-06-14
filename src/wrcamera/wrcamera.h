@@ -28,6 +28,7 @@ public:
 private:
     std::ofstream frameOut;
     CameraSettings cmSettings;
+    cv::VideoWriter writer;
     bool end;
     bool writing;
     re_time writing_start;
@@ -48,6 +49,7 @@ public slots:
 public:
     CameraWriter();
     CameraWriter(CameraSettings);
+    void setDir(QString);
     bool isWriting();
     ~CameraWriter();
 };

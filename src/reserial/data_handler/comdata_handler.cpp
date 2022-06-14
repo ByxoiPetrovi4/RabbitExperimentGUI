@@ -118,9 +118,14 @@ __re_abstract_data process_answer(const char* str, uint16_t& pos, const uint16_t
     }
     return output;
 }
-__re_abstract_data process_command(const char*, uint16_t&, const uint16_t)
+__re_abstract_data process_command(const char* str, uint16_t& pos, const uint16_t len)
 {
-
+    __re_abstract_data output;
+    output.dat = output_buffer;
+    output.typ = DTCommand;
+    sprintf(output_buffer, "Close %d", (int)KClose);
+    output.len = strlen(output_buffer);
+    return output;
 }
 __re_abstract_data process_comment(const char* str, uint16_t& pos, const uint16_t len)
 {

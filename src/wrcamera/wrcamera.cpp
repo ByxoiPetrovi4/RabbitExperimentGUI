@@ -1,5 +1,12 @@
 #include "wrcamera.h"
 
+inline void QStringToCStr(const QString qstr, char* cstr, size_t max_size)
+{
+    QByteArray tmp = qstr.toLatin1();
+    strncpy(cstr, tmp.data(), max_size);
+    cstr[max_size] = '\0';
+}
+
 using namespace cv;
 
 CameraWriter::CameraWriter()
@@ -48,6 +55,11 @@ void CameraWriter::stop()
     end = true;
 }
 
+void CameraWriter::setDir(QString dir)
+{
+    QStringToCStr(dir, workingDir, 127);
+}
+
 bool CameraWriter::isWriting()
 {
     return writing;
@@ -56,7 +68,8 @@ bool CameraWriter::isWriting()
 void CameraWriter::run()
 {
     Mat src;
-    frameOut.open("video_log.txt", std::ios::out | std::ios::app);
+    std::string dir =  this->workingDir;
+    frameOut.open(dir + "/video_log.txt", std::ios::out | std::ios::app);
     VideoCapture cap(0, CAP_V4L2);
     writing = false;
     displaying = false;
@@ -86,10 +99,9 @@ void CameraWriter::run()
     }
     bool isColor = (src.type() == CV_8UC3);
     //--- INITIALIZE VIDEOWRITER
-    VideoWriter writer;
-    double fps = 40.0;                          // framerate of the created video stream
-    std::string filename = "./live.avi";             // name of the output video file
-    writer.open(filename, codec, fps, src.size(), isColor);
+    double fps = 30.0;                          // framerate of the created video stream
+       // name of the output video file
+    writer.open(dir + "/live.avi", codec, fps, src.size(), isColor);
     cap.set(CAP_PROP_BUFFERSIZE, 3);
     // check if we succeeded
     if (!writer.isOpened()) {
@@ -129,10 +141,10 @@ void CameraWriter::run()
             }
         }
         QImage qOriginalImage((uchar*)src.data, src.cols,
-            src.rows, src.step, QImage::Format_RGB888);
-
+            src.rows, src.step, QImage::Format_BGR888);
         if(displaying) emit newFrame(qOriginalImage);
     }
+
     writer.release();
     frameOut.close();
 }

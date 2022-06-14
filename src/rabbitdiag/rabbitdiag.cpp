@@ -12,9 +12,24 @@ RabbitDiag::RabbitDiag(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::RabbitDiag)
 {
-    char buf[64];
     ui->setupUi(this);
-    FILE* cfgFile = fopen(CONFIG_FILENAME, "r");
+    ui->spectatorName->addItem(tr("None"));
+    //added for case without spectator
+
+    ui->experimentDate->setDate(QDate::currentDate());
+
+    readConfig();
+}
+
+RabbitDiag::~RabbitDiag()
+{
+    delete ui;
+}
+
+void RabbitDiag::readConfig()
+{
+    char buf[64];
+    FILE* cfgFile = fopen(REDIAG_CONFIG_FILENAME, "r");
     if(cfgFile == 0)
     {
         ui->actorName->addItem(QString("Joka"));
@@ -23,39 +38,34 @@ RabbitDiag::RabbitDiag(QWidget *parent) :
         qDebug() << std::strerror(errno);
         return;
     }
-    int i = 0;
-    for(char ch = fgetc(cfgFile); ch == '#' && ch != EOF;
-        ch = fgetc(cfgFile))
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
     {
-       fgets(buf, 64, cfgFile);
-       buf[strlen(buf)-1] = 0;
-       ui->workerName->addItem(QString(buf));
-       //ui->workerName->setItemData(i, Qt::AlignVCenter, Qt::TextAlignmentRole);
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->workerName->addItem(QString(buf));
+       }
     }
-    i = 0;
-    for(char ch = fgetc(cfgFile); ch == '#' && ch != EOF;
-          ch = fgetc(cfgFile))
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
     {
-       fgets(buf, 64, cfgFile);
-       buf[strlen(buf)-1] = 0;
-       ui->actorName->addItem(QString(buf));
-       //ui->actorName->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->actorName->addItem(QString(buf));
+       }
     }
-    i = 0;
-    for(char ch = fgetc(cfgFile); ch == '#' && ch != EOF;
-          ch = fgetc(cfgFile))
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
     {
-       fgets(buf, 64, cfgFile);
-       buf[strlen(buf)-1] = 0;
-       ui->spectatorName->addItem(QString(buf));
-       //ui->spectatorName->setItemData(i, Qt::AlignCenter, Qt::TextAlignmentRole);
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->spectatorName->addItem(QString(buf));
+       }
     }
     fclose(cfgFile);
-}
-
-RabbitDiag::~RabbitDiag()
-{
-    delete ui;
 }
 
 Info_Settings RabbitDiag::settings()

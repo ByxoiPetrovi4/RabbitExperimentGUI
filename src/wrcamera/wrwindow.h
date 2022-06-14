@@ -20,6 +20,8 @@ class wrwindow : public QWidget
 public:
     explicit wrwindow(CameraWriter* ,QWidget *parent = nullptr);
     ~wrwindow();
+
+    void kill();
 private slots:
     void on_writeButton_clicked();
     void closeEvent(QCloseEvent*) override;
@@ -29,6 +31,7 @@ private slots:
 private:
     Ui::wrwindow *ui;
     CameraWriter* camwr;
+    uint8_t killable;
 };
 
 #endif // WRWINDOW_H

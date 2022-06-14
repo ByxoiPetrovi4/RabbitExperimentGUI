@@ -44,7 +44,12 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
             this, SLOT(newMessage(QString)));
     connect(reSerial, SIGNAL(settingsReceived(RE_Settings)),
             this, SLOT(settingsReceived(RE_Settings)));
+    connect(reSerial, SIGNAL(endOfFood()), this,
+            SLOT(experimentStop()));
+    connect(this, SIGNAL(startDate()),
+            reSerial, SLOT(writeStartTime()));
 
+    readConfig();
 }
 
 MainWindow::~MainWindow()
@@ -72,6 +77,8 @@ void MainWindow::stateChange(RESerial::ProcessState st)
             break;
         case RESerial::AwaitEvent:
             ui->settingsBox->setEnabled(true);
+            ui->cameraButton->setEnabled(true);
+            ui->startButton->setEnabled(true);
             ui->connectButton->setText(tr("Disconnect"));
             connected = true;
             break;
@@ -117,15 +124,19 @@ void MainWindow::on_connectButton_clicked()
                 "Do you really want to disconnect device?",
                 QMessageBox::Yes|QMessageBox::No) ==
                 QMessageBox::No)return;
-        experimentStop();
+        if(reSerial->getState() != RESerial::NoConnect) experimentStop();
         reSerial->Disconnect();
         connected = false;
         ui->connectButton->setText(tr("Connect"));
+        ui->cameraButton->setEnabled(false);
         return;
     }
     try {
+        QString subDir = QDateTime::currentDateTime().toString(Qt::ISODate) +
+                "_" + rabbitDialog->getSubdirectory();
+        reSerial->setWorkDir(saveDirectory, subDir);
+        cmwr->setDir(saveDirectory + "/" + subDir);
         reSerial->Connect(serialDialog->settings());
-        ui->settingsBox->setEnabled(true);
     }  catch (QString exp) {
 
     }
@@ -177,12 +188,12 @@ void MainWindow::on_startButton_clicked()
     {
         reSerial->writeExpInfo(rabbitDialog->settings());
         reSerial->sendCommand(KStart);
+        emit startDate();
         experimentStart();
         return;
     }
     if(experimentActive)
     {
-        reSerial->sendCommand(KClose);
         experimentStop();
     }
 }
@@ -194,8 +205,6 @@ void MainWindow::on_actionSave_at_triggered()
                                                  "\\",
                                                  QFileDialog::ShowDirsOnly
                                                  | QFileDialog::DontResolveSymlinks);
-    reSerial->setWorkDir(saveDirectory, QDateTime::currentDateTime().toString(Qt::ISODate) +
-                         "_" + rabbitDialog->getSubdirectory());
 }
 
 
@@ -245,6 +254,102 @@ void MainWindow::experimentStop()
 
     ui->pauseButton->setEnabled(false);
     ui->startButton->setEnabled(false);
+    reSerial->closeOutput();
 }
 
+void MainWindow::readConfig()
+{
+    FILE* cfgFile = fopen(RE_CONFIG_FILENAME, "r");
+    if(cfgFile == 0)
+    {
+        qDebug() << std::strerror(errno);
+        return;
+    }
+    char buf[127];
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->manualCheck->setChecked(buf[0] != 0);
+           break;
+       }
+    }
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->soundLengthSPBox->setValue(strtod(buf, 0));
+           break;
+       }
+    }
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->pressIntervalSPBox->setValue(strtod(buf, 0));
+           break;
+       }
+    }
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 64, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->maxDelaySPBox->setValue(strtod(buf, 0));
+           break;
+       }
+    }
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 32, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->minDelaySPBox->setValue(strtod(buf, 0));
+           break;
+       }
+    }
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 32, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           ui->foodSPBox->setValue(strtol(buf, 0, 0));
+           break;
+       }
+    }
+    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
+        fgets(buf, 32, cfgFile))
+    {
+       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
+       {
+           buf[strlen(buf)-1] = 0;
+           saveDirectory = tr(buf);
+           break;
+       }
+    }
+    fclose(cfgFile);
+}
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QMessageBox::StandardButton resBtn = QMessageBox::question( this, tr("Rabbit Experiment"),
+                tr("Are you sure?\n"), QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                QMessageBox::Yes);
+    if (resBtn != QMessageBox::Yes)
+    {
+        event->ignore();
+        return;
+    }
+    if(connected)reSerial->Disconnect();
+    cameraWindow->kill();
+    event->accept();
+}

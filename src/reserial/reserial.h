@@ -38,6 +38,7 @@ public:
     void writeExpInfo(const Info_Settings);
 
     void setWorkDir(const QString&, const QString&);
+    ProcessState getState();
 
     RE_Settings settings();
 
@@ -46,6 +47,7 @@ public:
 
 public slots:
     void timerTick();
+    void writeStartTime();
     void dataProcess();
 
 signals:
@@ -54,7 +56,7 @@ signals:
     void stateChange(RESerial::ProcessState);
     void settingsReceived(RE_Settings);
     void resendFails();
-    //void endOfFood();
+    void endOfFood();
 
 private:
     RE_Settings     Settings;

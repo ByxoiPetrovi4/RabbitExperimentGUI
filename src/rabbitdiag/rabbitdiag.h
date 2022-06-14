@@ -10,8 +10,8 @@
 #include <cerrno>
 #include "protocol.h"
 
-#define CONFIG_FILENAME "rediag.cfg"
-#define NEW_ITEM_SYMBOL '#'
+#define REDIAG_CONFIG_FILENAME "rediag.cfg"
+#define REDIAG_COMMENT_SYMBOL '#'
 
 namespace Ui {
 class RabbitDiag;
@@ -32,6 +32,8 @@ private slots:
     void on_setupTimeButton_clicked();
 
 private:
+    void readConfig();
+
     void updateSettings();
 
 private:

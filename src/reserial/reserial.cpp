@@ -59,8 +59,10 @@ void RESerial::Connect(const SerialDiag::Settings st)
 
 void RESerial::Disconnect()
 {
-    sendCommand(KClose);
-    QThread::msleep(100);
+    if(State != NoConnect)
+    {
+        sendCommand(KClose);
+    }
     close();
     emit statusChange(tr("Disconnected"));
     serialTimer->stop();
@@ -82,9 +84,13 @@ void RESerial::openOutput()
 
 void RESerial::closeOutput()
 {
-    if(openFiles.dataFile!=0)fclose(openFiles.dataFile);
-    if(openFiles.mainLog!=0)fclose(openFiles.mainLog);
-    if(openFiles.settingsFile!=0)fclose(openFiles.settingsFile);
+    State = NoConnect;
+    if(openFiles.dataFile!=0)fclose(openFiles.dataFile) == 0 ?
+                openFiles.dataFile = 0 : throw "Couldn't close";
+    if(openFiles.mainLog!=0)fclose(openFiles.mainLog)  == 0 ?
+                openFiles.mainLog = 0 : throw "Couldn't close";
+    if(openFiles.settingsFile!=0)fclose(openFiles.settingsFile)  == 0 ?
+                openFiles.settingsFile = 0 : throw "Couldn't close";
 }
 
 void RESerial::writeExpInfo(const Info_Settings ist)
@@ -105,10 +111,24 @@ void RESerial::writeExpInfo(const Info_Settings ist)
     fprintf(openFiles.settingsFile, "#Mode\n%c\n", ist.learning ? 'L' : 'E');
 }
 
+void RESerial::writeStartTime()
+{
+    char buf[64];
+    retimeToStr(GetTimeStamp(), 0, buf);
+    fputs("#Start time\n", openFiles.settingsFile);
+    fputs(buf, openFiles.settingsFile);
+    fputc('\n', openFiles.settingsFile);
+}
+
 void RESerial::setWorkDir(const QString &wd, const QString &sd)
 {
     workDirectory = wd;
     subDirectory = sd;
+}
+
+RESerial::ProcessState RESerial::getState()
+{
+    return State;
 }
 
 void RESerial::sendCommand(Keywords k)
@@ -201,7 +221,19 @@ void RESerial::processAA(void)
         if(proc_data.typ == DTComment)
         {
             retimeToStr(GetTimeStamp(), 0, buf);
-            newMessage(tr(buf) + " " + ToStr(proc_data));
+            emit newMessage(tr(buf) + " " + ToStr(proc_data));
+            return;
+        }
+        if(proc_data.typ == DTCommand)
+            //the only command is experimant end
+        {
+            retimeToStr(GetTimeStamp(), 0, buf);
+            emit newMessage(tr(buf) + " " + ToStr(proc_data));
+            fputs(buf, openFiles.dataFile);
+            fputc(' ', openFiles.dataFile);
+            fputs(ToStr(proc_data), openFiles.dataFile);
+            fputc('\n', openFiles.dataFile);
+            emit endOfFood();
             return;
         }
         retimeToStr(GetTimeStamp(), 0, buf);
@@ -235,7 +267,18 @@ void RESerial::processAE(void)
         if(proc_data.typ == DTComment)
         {
             retimeToStr(GetTimeStamp(), 0, buf);
-            newMessage(tr(buf) + " " + ToStr(proc_data));
+            emit newMessage(tr(buf) + " " + ToStr(proc_data));
+            return;
+        }
+        if(proc_data.typ == DTCommand)
+        {
+            retimeToStr(GetTimeStamp(), 0, buf);
+            emit newMessage(tr(buf) + " " + ToStr(proc_data));
+            fputs(buf, openFiles.dataFile);
+            fputc(' ', openFiles.dataFile);
+            fputs(ToStr(proc_data), openFiles.dataFile);
+            fputc('\n', openFiles.dataFile);
+            emit endOfFood();
             return;
         }
         retimeToStr(GetTimeStamp(), 0, buf);
@@ -243,7 +286,7 @@ void RESerial::processAE(void)
         fputc(' ', openFiles.dataFile);
         fputs(ToStr(proc_data), openFiles.dataFile);
         fputc('\n', openFiles.dataFile);
-        newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
+        emit newMessage(tr(buf) + " " + ToStr(proc_data) + "\n");
     }
 }
 

@@ -12,6 +12,9 @@
 #include "reserial.h"
 #include "wrwindow.h"
 
+#define RE_CONFIG_FILENAME "defsettings.cfg"
+#define RE_COMMENT_SYMBOL  '#'
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -24,6 +27,9 @@ public:
     MainWindow(CameraWriter*, wrwindow*, QWidget *parent = nullptr);
     ~MainWindow();
     void showStatusMessage(const QString &);
+
+signals:
+    void startDate();
 
 public slots:
     void statusChange(QString);
@@ -38,6 +44,10 @@ public slots:
     void on_connectButton_clicked();
 
 private slots:
+    void closeEvent(QCloseEvent*) override;
+
+    void experimentStop();
+
     void on_soundButton_clicked();
 
     void on_startButton_clicked();
@@ -75,6 +85,6 @@ private:
     QString saveDirectory;
 
     void experimentStart();
-    void experimentStop();
+    void readConfig();
 };
 #endif // MAINWINDOW_H
