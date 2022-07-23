@@ -84,6 +84,7 @@ void RESerial::openOutput()
 
 void RESerial::closeOutput()
 {
+    sendCommand(KClose);
     State = NoConnect;
     if(openFiles.dataFile!=0)fclose(openFiles.dataFile) == 0 ?
                 openFiles.dataFile = 0 : throw "Couldn't close";

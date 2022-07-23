@@ -11,6 +11,7 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
     serialDialog = new SerialDiag(this);
     rabbitDialog = new RabbitDiag(this);
     reSerial = new RESerial(this);
+    dsTimer  = new QTimer(this);
 
     hkeyFeed = new QShortcut(this);
     hkeyEFeed = new QShortcut(this);
@@ -48,6 +49,13 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
             SLOT(experimentStop()));
     connect(this, SIGNAL(startDate()),
             reSerial, SLOT(writeStartTime()));
+    connect(dsTimer, SIGNAL(timeout()), this,
+            SLOT(on_sdTimer_count()));
+
+    dsTimer->setInterval(60000);
+    dsTimer->setSingleShot(false);
+    dsTimer->start();
+    on_sdTimer_count();
 
     readConfig();
 }
@@ -233,6 +241,21 @@ void MainWindow::on_settingsButton_clicked()
     reSerial->sendSettings(st);
 }
 
+void MainWindow::on_sdTimer_count()
+{
+    statvfs64("/", &diskStats);
+    freeSpace = diskStats.f_bavail*4096ull/1000000000.0;
+    ui->spaceLabel->setText(tr("Free space: ") + QString::number(freeSpace) + " Gb");
+    if(freeSpace < 5.0)
+    {
+        QMessageBox::warning(this, tr("Rabbit experiment"), tr("Low on freespace autostop on 1 Gb"));
+    }
+    if(freeSpace < 1.0)
+    {
+        experimentStop();
+    }
+}
+
 void MainWindow::experimentStart()
 {
     experimentActive = true;
@@ -243,6 +266,7 @@ void MainWindow::experimentStart()
     ui->pauseButton->setEnabled(true);
     ui->startButton->setText("Stop");
     ui->settingsBox->setEnabled(false);
+
 }
 
 void MainWindow::experimentStop()
@@ -255,6 +279,7 @@ void MainWindow::experimentStop()
     ui->pauseButton->setEnabled(false);
     ui->startButton->setEnabled(false);
     reSerial->closeOutput();
+    cameraWindow->kill();
 }
 
 void MainWindow::readConfig()

@@ -6,6 +6,7 @@
 #include <QSerialPort>
 #include <QMessageBox>
 #include <QShortcut>
+#include <sys/statvfs.h>
 #include "serialdiag.h"
 #include "rabbitdiag.h"
 #include "data_handler.h"
@@ -66,12 +67,15 @@ private slots:
 
     void on_feedErrorButton_clicked();
 
+    void on_sdTimer_count();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
     RabbitDiag*     rabbitDialog = nullptr;
     RESerial*       reSerial = nullptr;
     CameraWriter*   cmwr = nullptr;
+    QTimer*         dsTimer = nullptr;
     wrwindow*       cameraWindow = nullptr;
 
     QShortcut*      hkeyFeed = nullptr;
@@ -83,6 +87,9 @@ private:
     bool readyToStart;
     bool experimentActive;
     QString saveDirectory;
+
+    struct statvfs64 diskStats;
+    double freeSpace;   //free space in Gb
 
     void experimentStart();
     void readConfig();

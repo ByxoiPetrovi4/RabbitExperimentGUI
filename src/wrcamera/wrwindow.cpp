@@ -25,6 +25,9 @@ void wrwindow::kill()
 {
     camwr->stop();
     killable = true;
+    ui->displayCBox->setCheckState(Qt::Unchecked);
+    camwr->write(false);
+    ui->writeButton->setText("Write");
 }
 
 void wrwindow::closeEvent(QCloseEvent *event)
