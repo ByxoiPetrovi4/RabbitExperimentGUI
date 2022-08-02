@@ -45,17 +45,19 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
             this, SLOT(newMessage(QString)));
     connect(reSerial, SIGNAL(settingsReceived(RE_Settings)),
             this, SLOT(settingsReceived(RE_Settings)));
+    connect(reSerial, SIGNAL(settingsReceiveError()),
+            this, SLOT(settingsReceiveError()));
     connect(reSerial, SIGNAL(endOfFood()), this,
             SLOT(experimentStop()));
     connect(this, SIGNAL(startDate()),
             reSerial, SLOT(writeStartTime()));
     connect(dsTimer, SIGNAL(timeout()), this,
-            SLOT(on_sdTimer_count()));
+            SLOT(on_sdTimercount()));
 
     dsTimer->setInterval(60000);
     dsTimer->setSingleShot(false);
     dsTimer->start();
-    on_sdTimer_count();
+    on_sdTimercount();
 
     readConfig();
 }
@@ -86,7 +88,6 @@ void MainWindow::stateChange(RESerial::ProcessState st)
         case RESerial::AwaitEvent:
             ui->settingsBox->setEnabled(true);
             ui->cameraButton->setEnabled(true);
-            ui->startButton->setEnabled(true);
             ui->connectButton->setText(tr("Disconnect"));
             connected = true;
             break;
@@ -101,6 +102,25 @@ void MainWindow::newMessage( QString txt)
         ui->plainTextEdit->insertPlainText(txt);
         return;
     }
+    if(txt.section(' ', 2, 2 ).toUInt() == KPause)
+    {
+        if(experimentActive)
+        {
+            experimentActive = false;
+            ui->feedButton->setEnabled(false);
+            ui->soundButton->setEnabled(false);
+            ui->feedErrorButton->setEnabled(false);
+            ui->pauseButton->setText("Unpause");
+        }
+        else
+        {
+            experimentActive = true;
+            ui->feedButton->setEnabled(true);
+            ui->soundButton->setEnabled(true);
+            ui->feedErrorButton->setEnabled(true);
+            ui->pauseButton->setText("Pause");
+        }
+    }
     //check for enum output, if it's there than don't show enum
     ui->plainTextEdit->insertPlainText(txt.section(' ', 0, 1) + "\n");
 }
@@ -110,6 +130,13 @@ void MainWindow::settingsReceived(RE_Settings set)
     ui->startButton->setText("Start");
     ui->startButton->setEnabled(true);
     readyToStart = true;
+}
+
+void MainWindow::settingsReceiveError()
+{
+    QMessageBox::warning(this, "Rabbit Experiment Warning",
+                    "Receiving settings error!\nReplug USB to Arduino!",
+                         QMessageBox::Ok);
 }
 
 void MainWindow::on_actionSerial_settings_triggered()
@@ -172,22 +199,6 @@ void MainWindow::on_feedErrorButton_clicked()
 void MainWindow::on_pauseButton_clicked()
 {
     reSerial->sendCommand(KPause);
-    if(experimentActive)
-    {
-        experimentActive = false;
-        ui->feedButton->setEnabled(false);
-        ui->soundButton->setEnabled(false);
-        ui->feedErrorButton->setEnabled(false);
-
-        ui->pauseButton->setText("Unpause");
-        return;
-    }
-    experimentActive = true;
-    ui->feedButton->setEnabled(true);
-    ui->soundButton->setEnabled(true);
-    ui->feedErrorButton->setEnabled(true);
-
-    ui->pauseButton->setText("Pause");
 }
 
 void MainWindow::on_startButton_clicked()
@@ -241,7 +252,7 @@ void MainWindow::on_settingsButton_clicked()
     reSerial->sendSettings(st);
 }
 
-void MainWindow::on_sdTimer_count()
+void MainWindow::on_sdTimercount()
 {
     statvfs64("/", &diskStats);
     freeSpace = diskStats.f_bavail*4096ull/1000000000.0;

@@ -55,6 +55,7 @@ signals:
     void statusChange(QString);
     void stateChange(RESerial::ProcessState);
     void settingsReceived(RE_Settings);
+    void settingsReceiveError();
     void resendFails();
     void endOfFood();
 

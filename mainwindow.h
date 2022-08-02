@@ -34,15 +34,22 @@ signals:
 
 public slots:
     void statusChange(QString);
+
     void stateChange(RESerial::ProcessState);
+
     void newMessage(QString);
+
     void settingsReceived(RE_Settings);
+
+    void settingsReceiveError();
 
     void on_actionSerial_settings_triggered();
 
     void on_actionRecord_settings_triggered();
 
     void on_connectButton_clicked();
+
+    void on_sdTimercount();
 
 private slots:
     void closeEvent(QCloseEvent*) override;
@@ -66,8 +73,6 @@ private slots:
     void on_pauseButton_clicked();
 
     void on_feedErrorButton_clicked();
-
-    void on_sdTimer_count();
 
 private:
     Ui::MainWindow *ui = nullptr;

@@ -203,7 +203,11 @@ void RESerial::processAA(void)
         }
         if(proc_data.typ >= DTSettings)
         {
-            if(memcmp(buf+1, lastTMessage.data()+1, len-1))return;
+            if(memcmp(buf+1, lastTMessage.data()+1, len-1))
+            {
+                emit settingsReceiveError();
+                return;
+            }
             State = AwaitEvent;
             serialTimer->stop();
             emit settingsReceived(Settings);
