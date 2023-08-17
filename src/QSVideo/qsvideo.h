@@ -162,7 +162,7 @@ public:
         Frame(const Frame&);
         ~Frame();
 
-        bool            empty();
+        bool            empty() const;
         void            set_transformrect(cv::Rect2i);
 
         friend QSVideo;
@@ -298,6 +298,7 @@ signals:
     void                    ready();
     void                    warning(int code);
     void                    error(int code);
+    void                    end();
 
 public:
     //Use only for already existing segments
@@ -338,6 +339,9 @@ public:
     /// if rewind to this frame isn't possible throw out of range
     /// or if rewind isn't supported throw rewind isn't possible
     virtual void        rewindF(qs::FrameT);
+
+    static void         videoParamsToVector(const VideoParams &params,
+                                            std::vector<int> &vec_params);
 };
 
 #endif // QSVIDEO_H

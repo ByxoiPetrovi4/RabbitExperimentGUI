@@ -32,7 +32,7 @@ QSVideo::Frame::~Frame()
     //delete mat;
 }
 
-bool QSVideo::Frame::empty()
+bool QSVideo::Frame::empty() const
 {
     return _empty;
 }
@@ -105,6 +105,7 @@ QSVideo::QSVideo(QString key, QObject *parent) : QObject{parent}
 
 QSVideo::~QSVideo()
 {
+    kill();
     if(info.state == QSV_NOTINITED)
         return;
     else
@@ -149,6 +150,7 @@ void QSVideo::kill()
     mlock();
     _getInfo()->state = QSV_KILL;
     munlock();
+    emit end();
 }
 
 void QSVideo::getFrame(QSVideo::Frame &out, int32_t i)
@@ -235,4 +237,18 @@ void QSVideo::rewindT(qs::TimeT t)
     info.rewindFrame = t;
     *_getInfo() = info;
     munlock();
+}
+
+void QSVideo::videoParamsToVector(const VideoParams &params,
+                                        std::vector<int> &vec_params)
+{
+    vec_params.clear();
+    vec_params.push_back(cv::CAP_PROP_FOURCC);
+    vec_params.push_back(((int*)params.fourcc)[0]);
+    vec_params.push_back(cv::CAP_PROP_FPS);
+    vec_params.push_back(params.fps);
+    vec_params.push_back(cv::CAP_PROP_FRAME_HEIGHT);
+    vec_params.push_back(params.fheight);
+    vec_params.push_back(cv::CAP_PROP_FRAME_WIDTH);
+    vec_params.push_back(params.fwidth);
 }

@@ -11,3 +11,5 @@ add_subdirectory(QSFrameViewier)
 add_subdirectory(QSTransform)
 
 add_subdirectory(QSVideo)
+
+add_subdirectory(REVideoWindow)

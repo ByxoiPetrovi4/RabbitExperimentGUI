@@ -112,9 +112,10 @@ QSVideo::UStatus QSVideoCamera::update()
         auto fr = _getFrameC(info.buffer_lenw);
         if(!cap.retrieve(fr->mat))
         {
-            info.state = QSV_STOP;
+            info.state = QSV_ERROR;
             *_getInfo() = info;
             munlock();
+            emit error(1);
             return QSV_EXIT;
         }
         auto dur =
@@ -143,7 +144,22 @@ QSVideo::UStatus QSVideoCamera::update()
         info.buffer_lenw++;
         *_getInfo() = info;
         munlock();
-        cap.grab();
+        int i = 0;
+        while(!cap.grab())
+        {
+            qWarning() << "Couldn't grab frame!";
+            if(i>3)
+            {
+                mlock();
+                info = *_getInfo();
+                info.state = QSV_ERROR;
+                *_getInfo() = info;
+                munlock();
+                emit error(1);
+                return QSV_EXIT;
+            }
+            i++;
+        }
         auto now = std::chrono::high_resolution_clock::now();
         if(now < nextRead - 1ms)
         {

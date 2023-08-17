@@ -7,26 +7,17 @@ FOREACH(subdir ${SUBDIRS})
   ADD_SUBDIRECTORY(${subdir})
 ENDFOREACH()
 
-project(QSVideo VERSION 0.1 LANGUAGES CXX)
+project(REVideoWindow VERSION 0.1 LANGUAGES CXX)
 
 SET_DEFAULT_SETTINGS()
 
 set(PROJECT_SOURCES
-    qsvideo.h
-    qsvideo.cpp
-    qsvideofile.cpp
-    qsvideofile.h
-    qsvideostream.cpp
-    qsvideostream.h
-    qsvideouser.cpp
-    qsvideouser.h
-    qsvideocamera.cpp
-    qsvideocamera.h
-    qsframewriter.cpp
-    qsframewriter.h
+    videowindow.cpp
+    videowindow.h
+    videowindow.ui
 )
 
-list(APPEND EXTRA_LIBS "QSTransform" "${OpenCV_LIBS}")
+list(APPEND EXTRA_LIBS "QSVideo" "QSFrameViewier" "${OpenCV_LIBS}")
 list(APPEND TEST_FILES "test.json")
 list(APPEND TEST_FILES "test1.json")
 
