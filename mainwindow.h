@@ -12,6 +12,7 @@
 #include "data_handler.h"
 #include "reserial.h"
 #include "wrwindow.h"
+#include "qsframeviewier.h"
 
 #define RE_CONFIG_FILENAME "defsettings.cfg"
 #define RE_COMMENT_SYMBOL  '#'
@@ -92,6 +93,8 @@ private:
     bool readyToStart;
     bool experimentActive;
     QString saveDirectory;
+    QSFrameViewier gv;
+    QSFrameViewier fv;
 
     struct statvfs64 diskStats;
     double freeSpace;   //free space in Gb

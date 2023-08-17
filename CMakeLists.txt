@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.5)
 
 project(RabbitExperimentGUI VERSION 0.2 LANGUAGES CXX)
 
@@ -32,7 +32,10 @@ list(APPEND EXTRA_LIBS SerialDiag
                         RabbitDiag
                         RE_DataHandler
                         RESerial
-                        CameraWriter)
+                        CameraWriter
+                        QSVideo
+                        QSTransform
+                        QSFrameViewier)
 
 list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/reserial/data_handler"
                         "${PROJECT_SOURCE_DIR}/src/reserial/serialdiag"
@@ -44,6 +47,37 @@ list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/reserial/data_handler"
 set_target_properties(RabbitExperimentGUI PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
+
+install(TARGETS RabbitExperimentGUI
+        CONFIGURATIONS Release
+        RUNTIME DESTINATION bin/)
+
+install(TARGETS ${EXTRA_LIBS}
+        CONFIGURATIONS Release
+        RUNTIME DESTINATION bin/)
+    install( CODE [[
+                file(GET_RUNTIME_DEPENDENCIES
+                    LIBRARIES
+                        $<TARGET_FILE:library>
+                    RESOLVED_DEPENDENCIES_VAR _r_deps
+                    UNRESOLVED_DEPENDENCIES_VAR _u_deps
+                    DIRECTORIES
+                        $<TARGET_FILE_DIR:OpenSSL::SSL>
+                        $<TARGET_FILE_DIR:OpenSSL::Crypto>
+                )
+                foreach(_file ${_r_deps})
+                        file(INSTALL
+                            DESTINATION "${CMAKE_INSTALL_PREFIX}"
+                            TYPE SHARED_LIBRARY
+                            FOLLOW_SYMLINK_CHAIN
+                            FILES "${_file}"
+                        )
+                endforeach()
+                #message("UNRESOLVED_DEPENDENCIES_VAR: ${_u_deps}")
+            ]] )
+
+link_directories(${CMAKE_SOURCE_DIR}/lib)
+
 
 target_include_directories(RabbitExperimentGUI PRIVATE ${EXTRA_INCLUDES})
 

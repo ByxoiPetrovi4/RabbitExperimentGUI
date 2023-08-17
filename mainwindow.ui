@@ -100,7 +100,7 @@
           <item>
            <widget class="QPushButton" name="cameraButton">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Camera</string>
