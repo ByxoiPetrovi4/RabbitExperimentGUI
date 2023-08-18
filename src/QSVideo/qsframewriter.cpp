@@ -3,7 +3,7 @@
 QSFrameWriter::QSFrameWriter(std::string filename, QSVideo::VideoParams params)
 {
     auto pos = filename.find_last_of('.');
-    const auto t_filename = filename.substr(0, pos - 1) + "_ts.csv";
+    const auto t_filename = filename.substr(0, pos) + "_ts.csv";
     t_out.open(t_filename, std::fstream::ios_base::out);
     if(!t_out.is_open())
     {

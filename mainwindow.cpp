@@ -241,7 +241,7 @@ void MainWindow::on_cameraButton_clicked()
         //QSVideoStaticFile input("/home/roger/out.mkv", "423abu18");
         QSVideo::VideoParams params;
         params.api = cv::CAP_V4L2;
-        memcpy(params.fourcc, "YUYV", 4);
+        memcpy(params.fourcc, "MJPG", 2);
         params.fheight = 720;
         params.fwidth = 1280;
         params.fps = 30;

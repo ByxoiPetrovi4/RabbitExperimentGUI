@@ -21,6 +21,8 @@ public:
     ///Copy data from actual cursor position to out
     /// move cursor by 1
     void        getFrame(QSVideo::Frame &out) override;
+    ///Return last frame in queue
+    void        getFrameL(QSVideo::Frame &out);
     ///Find closest frame to time but timecode for frame must be greater than time
     /// move cursor to found frame, if there is no frame with needed out will be empty
     void        getFrameT(QSVideo::Frame &out, qs::TimeT time) override;

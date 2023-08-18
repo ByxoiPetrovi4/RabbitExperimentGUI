@@ -14,6 +14,7 @@ QSVideoUser::QSVideoUser(QString key, QObject *parent) : QSVideo{key, parent}
     info.users_active++;
     info.users_all++;
     *_getInfo() = info;
+    type = info.type;
     munlock();
 }
 
@@ -55,24 +56,43 @@ void QSVideoUser::getFrame(QSVideo::Frame &out)
     munlock();
 }
 
+void        QSVideoUser::getFrameL(QSVideo::Frame &out)
+{
+    mlock();
+    info = *_getInfo();
+    if(info.buffer_lenw == 0)
+    {
+        munlock();
+        out._empty = true;
+        return;
+    }
+    out = *_getFrameC(info.buffer_lenw-1);
+    info.users_iters[user_id] = info.buffer_lenw;
+    *_getInfo() = info;
+    munlock();
+}
+
 void QSVideoUser::getFrameT(QSVideo::Frame &out, qs::TimeT time)
 {
     if(!mlock(2))
-        out = Frame();
+    {
+        out._empty = true;
+        return;
+    }
     info = *_getInfo();
-    qs::TimeT dif = 0;
+    qs::TimeT dif = -99999999999999;
     int nindex = 0;
     for(int i = 0; i < info.buffer_lenw; i++)
     {
         qs::TimeT ndif = time-_getFrameC(i)->time;
-        if(ndif < dif)
+        if(ndif > dif && ndif < 0)
         {
             dif = ndif;
             nindex = i;
         }
     }
-    if(dif == 0)
-        out = Frame();
+    if(dif == -99999999999999)
+        out._empty = true;
     else
     {
         out = *_getFrameC(nindex);

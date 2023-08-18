@@ -84,6 +84,7 @@ QSVideoCamera::QSVideoCamera(QString key, VideoParams &params, int buffersz, QOb
         ptr += info.mat_memsize;
     }
     *_getInfo() = info;
+    type = info.type;
     munlock();
     start = std::chrono::high_resolution_clock::now();
     emit ready();

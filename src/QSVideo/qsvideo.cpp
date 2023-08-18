@@ -191,19 +191,19 @@ void QSVideo::getFrameT(QSVideo::Frame &out, qs::TimeT time)
 {
     mlock();
     info = *_getInfo();
-    qs::TimeT dif = 0;
+    qs::TimeT dif = -9999999999999;
     int nindex = 0;
     for(int i = 0; i < info.buffer_lenw; i++)
     {
         qs::TimeT ndif = time-_getFrameC(i)->time;
-        if(ndif < dif)
+        if(ndif > dif && ndif < 0)
         {
             dif = ndif;
             nindex = i;
         }
     }
-    if(dif == 0)
-        out = Frame();
+    if(dif == -9999999999999)
+        out._empty = true;
     else
     {
         out = *_getFrameC(nindex);

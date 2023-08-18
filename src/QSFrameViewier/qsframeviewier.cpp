@@ -9,7 +9,7 @@ QSFrameViewier::QSFrameViewier(QWidget* parent) : QLabel{parent},
     setAlignment(Qt::AlignCenter);
     redrawTimer = new QTimer(this);
     redrawTimer->setSingleShot(false);
-    redrawTimer->setInterval(15);
+    redrawTimer->setInterval(40);
     connect(redrawTimer, &QTimer::timeout,
             this, &QSFrameViewier::redraw);
     setScaledContents(true);
@@ -70,8 +70,14 @@ void QSFrameViewier::redraw()
         prevDrawTime = mc;
         return;
     }
-    video->getFrameT(currentFrame,
-                    currentTime + (mc - prevDrawTime)*speed);
+    if(video->getType()==QSVideo::QSV_STATICFILE)
+    {
+        video->getFrameT(currentFrame, currentTime + (mc - prevDrawTime)*speed);
+    }
+    else
+    {
+        video->getFrameL(currentFrame);
+    }
     //video->getFrame(currentFrame);
     if(!currentFrame.empty())
     {

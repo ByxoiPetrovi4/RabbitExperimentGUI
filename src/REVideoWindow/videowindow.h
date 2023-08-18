@@ -20,7 +20,8 @@ class VideoWindow : public QMainWindow
     std::thread             *thread;
     float                   videofile_fps = 30.f;
 public:
-    explicit VideoWindow(QSVideo::VideoParams videoParams, QString key, QWidget *parent = nullptr);
+    explicit VideoWindow(QSVideo::VideoParams videoParams, QString key, QString filePath = "/tmp/live.avi",
+                         float record_fps = 30.f, QWidget *parent = nullptr);
     ~VideoWindow();
 public slots:
     void            playPause();
