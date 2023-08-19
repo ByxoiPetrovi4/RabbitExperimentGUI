@@ -26,6 +26,7 @@ public:
 private:
 signals:
     void                    endOfFile();
+    void                    fps(float);
 };
 
 #endif // QSVIDEOSOURCE_H

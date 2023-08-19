@@ -87,6 +87,7 @@ QSVideoCamera::QSVideoCamera(QString key, VideoParams &params, int buffersz, QOb
     type = info.type;
     munlock();
     start = std::chrono::high_resolution_clock::now();
+    fps_time = std::chrono::high_resolution_clock::now();
     emit ready();
     nextRead = start + 1000ms/((long long)info.video_settings.fps);
     cap.grab();
@@ -111,6 +112,15 @@ QSVideo::UStatus QSVideoCamera::update()
             }
         }
         auto fr = _getFrameC(info.buffer_lenw);
+        if(fps_count%((int)info.video_settings.fps)==0)
+        {
+            auto _now = std::chrono::high_resolution_clock::now();
+            auto _dur = _now - fps_time;
+            float real_fps = 1000000.f/std::chrono::duration_cast<std::chrono::microseconds>(_dur).count()*info.video_settings.fps;
+            fps_time = _now;
+            emit fps(real_fps);
+        }
+        fps_count++;
         if(!cap.retrieve(fr->mat))
         {
             info.state = QSV_ERROR;

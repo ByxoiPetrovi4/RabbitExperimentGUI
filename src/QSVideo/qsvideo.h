@@ -266,6 +266,7 @@ protected:
                 return 0;
         }
         info.buffer_lenw -= mx;
+        info.buffer_posr = info.buffer_posr - mx > 0 ? info.buffer_posr-mx : 0;
         for(int i = 0; i < info.users_all; i++)
         {
             info.users_iters[i] = info.users_iters[i] != -1 ? info.users_iters[i]-mx : -1;
@@ -319,9 +320,6 @@ public:
     inline qs::FrameT getNumberOfFrames() const {return info.video_settings.all_frames;}
     ///Return length of video in us or return 0 if its videostream
     inline qs::TimeT getVideoLength() const {return info.video_settings.video_length;}
-    ///Function realease all related videousers and source
-    /// will kill qsvideo even in another process
-    void kill();
     ///IN ALL FUNCTIONS BELOW
     /// IF out is aneccesiable videostream should return empty frame
 
@@ -342,6 +340,10 @@ public:
 
     static void         videoParamsToVector(const VideoParams &params,
                                             std::vector<int> &vec_params);
+public slots:
+    ///Function realease all related videousers and source
+    /// will kill qsvideo even in another process
+    void kill();
 };
 
 #endif // QSVIDEO_H

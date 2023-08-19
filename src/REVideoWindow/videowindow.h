@@ -3,6 +3,8 @@
 
 #include <thread>
 #include <QMainWindow>
+#include <QMessageBox>
+#include <QCloseEvent>
 #include "../QSFrameViewier/qsframeviewier.h"
 #include "../QSVideo/qsframewriter.h"
 
@@ -23,15 +25,20 @@ public:
     explicit VideoWindow(QSVideo::VideoParams videoParams, QString key, QString filePath = "/tmp/live.avi",
                          float record_fps = 30.f, QWidget *parent = nullptr);
     ~VideoWindow();
+private:
+signals:
+    void            kill();
 public slots:
     void            playPause();
     void            recordStop();
+    void            fps(float);
 private:
     Ui::VideoWindow *ui;
 private slots:
     void            ready();
     void            error(int);
     void            stop();
+    void            closeEvent(QCloseEvent *event) override;
 };
 
 #endif // VIDEOWINDOW_H

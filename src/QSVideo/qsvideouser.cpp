@@ -82,7 +82,7 @@ void QSVideoUser::getFrameT(QSVideo::Frame &out, qs::TimeT time)
     info = *_getInfo();
     qs::TimeT dif = -99999999999999;
     int nindex = 0;
-    for(int i = 0; i < info.buffer_lenw; i++)
+    for(int i = info.users_iters[user_id]; i < info.buffer_lenw; i++)
     {
         qs::TimeT ndif = time-_getFrameC(i)->time;
         if(ndif > dif && ndif < 0)

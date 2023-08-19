@@ -8,6 +8,7 @@ class QSFrameWriter
 {
     cv::VideoWriter v_out;
     std::fstream    t_out;
+    qs::FrameT      frameCount = 0;
 public:
     QSFrameWriter(std::string filename, QSVideo::VideoParams params);
     void        write(const QSVideo::Frame &fr);

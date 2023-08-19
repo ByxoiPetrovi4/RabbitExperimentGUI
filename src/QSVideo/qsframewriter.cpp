@@ -22,6 +22,7 @@ void    QSFrameWriter::write(const QSVideo::Frame &fr)
 {
     if(fr.empty())
         return;
-    t_out << fr.frame << ' ' << fr.time << '\n';
+    t_out << frameCount << ' ' << fr.time << '\n';
     v_out.write(fr.mat);
+    frameCount++;
 }
