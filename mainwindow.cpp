@@ -307,8 +307,9 @@ void MainWindow::on_settingsButton_clicked()
 
 void MainWindow::on_sdTimercount()
 {
-    statvfs64("/", &diskStats);
-    freeSpace = diskStats.f_bavail*4096ull/1000000000.0;
+    /*statvfs64("/", &diskStats);
+    diskStats.
+    freeSpace = diskStats.f_bavail*4096ull/1000000000.0;*/
     ui->spaceLabel->setText(tr("Free space: ") + QString::number(freeSpace) + " Gb");
     if(freeSpace < 5.0)
     {
@@ -349,6 +350,22 @@ void MainWindow::experimentStop()
 void MainWindow::readConfig()
 {
     FILE* cfgFile = fopen(RE_CONFIG_FILENAME, "r");
+    std::fstream cfg_stream;
+    cfg_stream.open(RE_CONFIG_FILENAME);
+    if(!cfg_stream.is_open())
+    {
+        qDebug() << "Config couldn't be read!";
+        return;
+    }
+    nlohmann::json config;
+    try {
+        cfg_stream >> config;
+    } catch (std::exception &exc) {
+        qDebug() << exc.what();
+        return;
+    }
+    cfg_stream.close();
+
     if(cfgFile == 0)
     {
         qDebug() << std::strerror(errno);

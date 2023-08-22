@@ -1,12 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <fstream>
+#include "include/json.hpp"
 #include <QMainWindow>
 #include <QString>
 #include <QSerialPort>
 #include <QMessageBox>
 #include <QShortcut>
-#include <sys/statvfs.h>
+#include <QStorageInfo>
 #include "serialdiag.h"
 #include "rabbitdiag.h"
 #include "data_handler.h"
@@ -96,7 +98,7 @@ private:
     QSFrameViewier gv;
     QSFrameViewier fv;
 
-    struct statvfs64 diskStats;
+    QStorageInfo diskStats;
     double freeSpace;   //free space in Gb
 
     void experimentStart();
