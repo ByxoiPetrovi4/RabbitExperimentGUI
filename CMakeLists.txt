@@ -18,6 +18,7 @@ endif(WIN32)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Widgets SerialPort REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets SerialPort REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(RtAudio REQUIRED)
 
 set(MAIN_PROJECT main.cpp
     mainwindow.cpp
@@ -37,7 +38,9 @@ list(APPEND EXTRA_LIBS SerialDiag
                         CameraWriter
                         QSVideo
                         QSTransform
-                        QSFrameViewier)
+                        QSFrameViewier
+                        REVideoWindow
+                        REWAVAudioWriter)
 
 list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/src/reserial/data_handler"
                         "${PROJECT_SOURCE_DIR}/src/reserial/serialdiag"
@@ -65,7 +68,7 @@ target_include_directories(RabbitExperimentGUI PRIVATE ${EXTRA_INCLUDES})
 
 target_link_libraries(RabbitExperimentGUI PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
                     Qt${QT_VERSION_MAJOR}::SerialPort)
-target_link_libraries(RabbitExperimentGUI PRIVATE ${OpenCV_LIBS}
+target_link_libraries(RabbitExperimentGUI PRIVATE RtAudio::rtaudio ${OpenCV_LIBS}
                         ${EXTRA_LIBS})
 
 qt_finalize_executable(RabbitExperimentGUI)

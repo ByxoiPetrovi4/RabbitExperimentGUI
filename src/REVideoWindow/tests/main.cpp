@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
     QApplication a(argc, argv);
     QSVideo::VideoParams params;
-    /*params.api = cv::CAP_V4L2;
+    params.api = cv::CAP_V4L2;
     memcpy(params.fourcc, "MJPG", 4);
     params.fheight = 720;
     params.fwidth = 1280;
@@ -14,7 +14,7 @@ int main(int argc, char** argv)
     strcpy(params.src_name, "4");
     VideoWindow vw(params, "RE_Video2", "/tmp/video2.avi", 5.f);
     qDebug() << params.fwidth << params.fheight;
-    vw.show();*/
+    vw.show();
     params.api = cv::CAP_V4L2;
     memcpy(params.fourcc, "MJPG", 4);
     params.fheight = 720;

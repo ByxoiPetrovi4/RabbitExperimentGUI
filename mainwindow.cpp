@@ -6,7 +6,6 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    cameraWindow = wrw;
     cmwr = cw;
     serialDialog = new SerialDiag(this);
     rabbitDialog = new RabbitDiag(this);
@@ -235,63 +234,40 @@ void MainWindow::on_actionVideo_settings_triggered()
 
 void MainWindow::on_cameraButton_clicked()
 {
-    /*cmwr->start();
-    cameraWindow->show();*/
-    auto f = std::thread([]()->void{
-        //QSVideoStaticFile input("/home/roger/out.mkv", "423abu18");
-        QSVideo::VideoParams params;
-        params.api = cv::CAP_V4L2;
-        memcpy(params.fourcc, "MJPG", 2);
-        params.fheight = 720;
-        params.fwidth = 1280;
-        params.fps = 30;
-        strcpy(params.src_name, "/dev/video2");
-        QSVideoCamera input("423abu18", params);
-        while(1)
-        {
-            input.update();
-        }});
-    f.detach();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    auto g = std::thread([]()->void{
-        //QSVideoStaticFile input("/home/roger/out.mkv", "423abu18");
-        QSVideo::VideoParams params;
-        params.api = cv::CAP_V4L2;
-        memcpy(params.fourcc, "MJPG", 4);
-        params.fheight = 720;
-        params.fwidth = 1280;
-        params.fps = 30;
-        strcpy(params.src_name, "/dev/video0");
-
-        cv::VideoWriter vw("/tmp/tst2.avi", ((int*)&params.fourcc)[0], 10, {params.fwidth, params.fheight});
-        QSVideoCamera input("423abu19", params);
-        QSVideo::Frame fr;
-        fr.time = 0;
-        while(1)
-        {
-            auto upd = input.update();
-            if(upd == QSVideo::QSV_NEW)
-            {
-                input.getFrameT(fr, fr.time + 100000);
-                vw.write(fr.mat);
-            }
-        }});
-    g.detach();
-    std::this_thread::sleep_for(std::chrono::milliseconds(6000));
-    gv.setFixedHeight(600);
-    gv.setFixedWidth(800);
-    gv.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    gv.setFrame("423abu19");
-    gv.show();
-    gv.play();
-    fv.setFixedHeight(600);
-    fv.setFixedWidth(800);
-    fv.setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    fv.setFrame("423abu18");
-    fv.show();
-    fv.play();
+    if(vw1!=nullptr)
+    {
+        delete vw1;
+    }
+    QSVideo::VideoParams params;
+    params.api = cv::CAP_V4L2;
+    memcpy(params.fourcc, "MJPG", 4);
+    params.fheight = 720;
+    params.fwidth = 1280;
+    params.fps = 30;
+    strcpy(params.src_name, "4");
+    vw1 = new VideoWindow(params, "RE_Video4", "/tmp/video4.avi", 5.f);
+    qDebug() << params.fwidth << params.fheight;
+    vw1->show();
 }
 
+
+void MainWindow::on_camera2Button_clicked()
+{
+    if(vw2!=nullptr)
+    {
+        delete vw2;
+    }
+    QSVideo::VideoParams params;
+    params.api = cv::CAP_V4L2;
+    memcpy(params.fourcc, "MJPG", 4);
+    params.fheight = 720;
+    params.fwidth = 1280;
+    params.fps = 30;
+    strcpy(params.src_name, "0");
+    vw2 = new VideoWindow(params, "RE_Video0", "/tmp/video0.avi", 5.f);
+    qDebug() << params.fwidth << params.fheight;
+    vw2->show();
+}
 
 void MainWindow::on_settingsButton_clicked()
 {
@@ -311,14 +287,14 @@ void MainWindow::on_sdTimercount()
     diskStats.
     freeSpace = diskStats.f_bavail*4096ull/1000000000.0;*/
     ui->spaceLabel->setText(tr("Free space: ") + QString::number(freeSpace) + " Gb");
-    if(freeSpace < 5.0)
+    /*if(freeSpace < 5.0)
     {
         QMessageBox::warning(this, tr("Rabbit experiment"), tr("Low on freespace autostop on 1 Gb"));
     }
     if(freeSpace < 1.0)
     {
         experimentStop();
-    }
+    }*/
 }
 
 void MainWindow::experimentStart()
@@ -344,7 +320,7 @@ void MainWindow::experimentStop()
     ui->pauseButton->setEnabled(false);
     ui->startButton->setEnabled(false);
     reSerial->closeOutput();
-    cameraWindow->kill();
+
 }
 
 void MainWindow::readConfig()
@@ -456,6 +432,22 @@ void MainWindow::closeEvent(QCloseEvent *event)
         return;
     }
     if(connected)reSerial->Disconnect();
-    cameraWindow->kill();
     event->accept();
 }
+
+
+
+void MainWindow::on_recordSoundButton_clicked()
+{
+    if(!audioRecord)
+    {
+        REWavAudioWriter::Params par = {2, 44100, 16, "/home/roger/test.wav"};
+        REWavAudioWriter::start(par, waw);
+        audioRecord = true;
+    }
+    else
+    {
+        waw.~shared_ptr();
+    }
+}
+

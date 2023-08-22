@@ -14,6 +14,8 @@
 #include "data_handler.h"
 #include "reserial.h"
 #include "wrwindow.h"
+#include "src/REVideoWindow/videowindow.h"
+#include "src/REWAVAudioWriter/rewavaudiowriter.h"
 #include "qsframeviewier.h"
 
 #define RE_CONFIG_FILENAME "defsettings.cfg"
@@ -77,6 +79,10 @@ private slots:
 
     void on_feedErrorButton_clicked();
 
+    void on_camera2Button_clicked();
+
+    void on_recordSoundButton_clicked();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
@@ -84,7 +90,12 @@ private:
     RESerial*       reSerial = nullptr;
     CameraWriter*   cmwr = nullptr;
     QTimer*         dsTimer = nullptr;
-    wrwindow*       cameraWindow = nullptr;
+    VideoWindow*    vw1 = nullptr;
+    VideoWindow*    vw2 = nullptr;
+    std::shared_ptr<REWavAudioWriter>
+                    waw;
+    bool            audioRecord = false;
+    //wrwindow*       cameraWindow = nullptr;
 
     QShortcut*      hkeyFeed = nullptr;
     QShortcut*      hkeyEFeed = nullptr;

@@ -103,7 +103,21 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>Camera</string>
+             <string>Camera1</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="camera2Button">
+            <property name="text">
+             <string>Camera2</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="recordSoundButton">
+            <property name="text">
+             <string>Sound</string>
             </property>
            </widget>
           </item>
