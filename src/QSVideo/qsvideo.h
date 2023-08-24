@@ -167,6 +167,7 @@ public:
 
         friend QSVideo;
         friend class QSVideoStaticFile;
+        friend class QSVideoCamera;
         friend class QSVideoUser;
     };
 

@@ -12,6 +12,7 @@ class QSVideoStream : public QSVideo
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock>
                             nextRead;
+    Frame                   bufFrame;
 
     QSVideoStream(QString key, QObject *parent=nullptr);
     ///Add user for this videostream
@@ -23,6 +24,8 @@ protected:
 public:
     ///Update function for stream update
     virtual UStatus         update() = 0;
+    const inline QSVideo::Frame&
+                            getFrameL(){return bufFrame;}
 private:
 signals:
     void                    endOfFile();

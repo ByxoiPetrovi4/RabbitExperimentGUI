@@ -10,7 +10,7 @@ QSFrameWriter::QSFrameWriter(std::string filename, QSVideo::VideoParams params)
         qDebug() << "Couldn't open timestamp file!";
         throw 1;    //TODO: add proper exception
     }
-    v_out.open(filename, ((int*)&params.fourcc)[0], params.fps, {params.fwidth, params.fheight});
+    v_out.open(filename, v_out.fourcc('Y', 'U', 'Y', 'V'), params.fps, {params.fwidth, params.fheight});
     if(!t_out.is_open())
     {
         qDebug() << "Couldn't open video file!";
@@ -20,8 +20,6 @@ QSFrameWriter::QSFrameWriter(std::string filename, QSVideo::VideoParams params)
 
 void    QSFrameWriter::write(const QSVideo::Frame &fr)
 {
-    if(fr.empty())
-        return;
     t_out << frameCount << ' ' << fr.time << '\n';
     v_out.write(fr.mat);
     frameCount++;

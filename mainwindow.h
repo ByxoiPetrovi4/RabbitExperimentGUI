@@ -88,7 +88,6 @@ private:
     SerialDiag*     serialDialog = nullptr;
     RabbitDiag*     rabbitDialog = nullptr;
     RESerial*       reSerial = nullptr;
-    CameraWriter*   cmwr = nullptr;
     QTimer*         dsTimer = nullptr;
     VideoWindow*    vw1 = nullptr;
     VideoWindow*    vw2 = nullptr;
@@ -106,6 +105,7 @@ private:
     bool readyToStart;
     bool experimentActive;
     QString saveDirectory;
+    QString subDir;
     QSFrameViewier gv;
     QSFrameViewier fv;
 
