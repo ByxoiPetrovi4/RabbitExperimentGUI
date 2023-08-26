@@ -32,8 +32,6 @@ VideoWindow::VideoWindow(QSVideo::VideoParams videoParams, QString key, QString 
         params_cpy.fps = record_fps;
         auto fp = filePath.toStdString();
         QSFrameWriter fwriter(fp, params_cpy);
-        QSVideo::Frame fr;
-        fr.time = 0;
         auto start = cam.getStartTime();
         auto dur =
                 std::chrono::high_resolution_clock::now() - start;
@@ -45,8 +43,8 @@ VideoWindow::VideoWindow(QSVideo::VideoParams videoParams, QString key, QString 
             auto upd = cam.update();
             if(upd == QSVideo::QSV_NEW)
             {
-                cam.getFrameT(fr, durus);
-                if(!fr.empty())
+                auto fr = cam.getFrameL();
+                if(fr.time > durus)
                 {
                     durus += frame_time;
                     fwriter.write(fr);
@@ -113,7 +111,7 @@ void            VideoWindow::closeEvent(QCloseEvent *event)
         if (resBtn != QMessageBox::Yes) {
             event->ignore();
         } else {
-            emit kill();
+            delete viewier;
             event->accept();
         }
 }

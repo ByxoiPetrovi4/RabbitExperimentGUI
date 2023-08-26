@@ -31,15 +31,15 @@ QSVideoCamera::QSVideoCamera(QString key, VideoParams &params, int buffersz, QOb
     params.fps = cap.get(cv::CAP_PROP_FPS);
     params.fheight = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
     params.fwidth = cap.get(cv::CAP_PROP_FRAME_WIDTH);
-    cv::Mat tst;
     qDebug() << cap.get(cv::CAP_PROP_FPS);;
-    cap.read(tst);
-    if(tst.empty())
+    cap.read(bufFrame.mat);
+    bufFrame._empty = false;
+    if(bufFrame.empty())
         throw 1;    //TODO: add proper exception
     mem = new QSharedMemory();
     mem->setNativeKey(key);
     //Setup info about object
-    info.size = {tst.cols, tst.rows};
+    info.size = {bufFrame.mat.cols, bufFrame.mat.rows};
     info.mat_memsize = (info.size.height*info.size.width)*
             sizeof(uchar)*formatToBytes(info.video_settings.cvtype);
     info.buffer_posr = 0;
@@ -90,7 +90,6 @@ QSVideoCamera::QSVideoCamera(QString key, VideoParams &params, int buffersz, QOb
     fps_time = std::chrono::high_resolution_clock::now();
     emit ready();
     nextRead = start + 1000ms/((long long)info.video_settings.fps);
-    cap.grab();
 }
 
 QSVideo::UStatus QSVideoCamera::update()
@@ -112,6 +111,9 @@ QSVideo::UStatus QSVideoCamera::update()
             }
         }
         auto fr = _getFrameC(info.buffer_lenw);
+        cv::copyTo(bufFrame.mat, fr->mat, {});
+        fr->time = bufFrame.time;
+        fr->frame = bufFrame.frame;
         if(fps_count%((int)info.video_settings.fps)==0)
         {
             auto _now = std::chrono::high_resolution_clock::now();
@@ -120,22 +122,7 @@ QSVideo::UStatus QSVideoCamera::update()
             fps_time = _now;
             emit fps(real_fps);
         }
-        fps_count++;
-        if(!cap.retrieve(fr->mat))
-        {
-            info.state = QSV_ERROR;
-            *_getInfo() = info;
-            munlock();
-            emit error(1);
-            return QSV_EXIT;
-        }
-        auto dur =
-                std::chrono::high_resolution_clock::now() - start;
-        auto durus = std::chrono::duration_cast<std::chrono::microseconds>(dur);
-        current_time = durus.count();
-        current_frame++;
-        fr->frame = current_frame;
-        fr->time = current_time;/*
+        /*
         //debug label on matrix
         auto font                   = cv::FONT_HERSHEY_SIMPLEX;
         auto bottomLeftCornerOfText = cv::Point2i(10,200);
@@ -172,6 +159,22 @@ QSVideo::UStatus QSVideoCamera::update()
             i++;
         }
         auto now = std::chrono::high_resolution_clock::now();
+        fps_count++;
+        auto dur =
+                std::chrono::high_resolution_clock::now() - start;
+        auto durus = std::chrono::duration_cast<std::chrono::microseconds>(dur);
+        current_time = durus.count();
+        current_frame++;
+        bufFrame.frame = current_frame;
+        bufFrame.time = current_time;
+        if(!cap.retrieve(bufFrame.mat))
+        {
+            info.state = QSV_ERROR;
+            *_getInfo() = info;
+            munlock();
+            emit error(1);
+            return QSV_EXIT;
+        }
         if(now < nextRead - 1ms)
         {
             auto sleep = nextRead - now - 1ms;

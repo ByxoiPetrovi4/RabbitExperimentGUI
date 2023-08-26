@@ -6,7 +6,6 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    cmwr = cw;
     serialDialog = new SerialDiag(this);
     rabbitDialog = new RabbitDiag(this);
     reSerial = new RESerial(this);
@@ -166,10 +165,9 @@ void MainWindow::on_connectButton_clicked()
         return;
     }
     try {
-        QString subDir = QDateTime::currentDateTime().toString(Qt::ISODate) +
+        subDir = QDateTime::currentDateTime().toString(Qt::ISODate) +
                 "_" + rabbitDialog->getSubdirectory();
         reSerial->setWorkDir(saveDirectory, subDir);
-        cmwr->setDir(saveDirectory + "/" + subDir);
         reSerial->Connect(serialDialog->settings());
     }  catch (QString exp) {
 
@@ -244,8 +242,8 @@ void MainWindow::on_cameraButton_clicked()
     params.fheight = 720;
     params.fwidth = 1280;
     params.fps = 30;
-    strcpy(params.src_name, "4");
-    vw1 = new VideoWindow(params, "RE_Video4", "/tmp/video4.avi", 5.f);
+    strcpy(params.src_name, "2");
+    vw1 = new VideoWindow(params, "RE_Video2", saveDirectory + "/" + subDir + "/video2.avi", 25.f);
     qDebug() << params.fwidth << params.fheight;
     vw1->show();
 }
@@ -262,9 +260,9 @@ void MainWindow::on_camera2Button_clicked()
     memcpy(params.fourcc, "MJPG", 4);
     params.fheight = 720;
     params.fwidth = 1280;
-    params.fps = 30;
+    params.fps = 120;
     strcpy(params.src_name, "0");
-    vw2 = new VideoWindow(params, "RE_Video0", "/tmp/video0.avi", 5.f);
+    vw2 = new VideoWindow(params, "RE_Video0", saveDirectory + "/" + subDir + "/video0.avi", 30.f);
     qDebug() << params.fwidth << params.fheight;
     vw2->show();
 }
@@ -441,7 +439,9 @@ void MainWindow::on_recordSoundButton_clicked()
 {
     if(!audioRecord)
     {
-        REWavAudioWriter::Params par = {2, 44100, 16, "/home/roger/test.wav"};
+        auto path = (saveDirectory + "/" + subDir + "/sound.wav").toStdString();
+        REWavAudioWriter::Params par = {2, 44100, 16, ""};
+        strncpy(par.file, path.c_str(), 255);
         REWavAudioWriter::start(par, waw);
         audioRecord = true;
     }

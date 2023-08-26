@@ -148,7 +148,9 @@ const QString QSVideo::getSourceKey() const
 void QSVideo::kill()
 {
     mlock();
-    _getInfo()->state = QSV_KILL;
+    info = *_getInfo();
+    info.state = QSV_KILL;
+    *_getInfo() = info;
     munlock();
     emit end();
 }
