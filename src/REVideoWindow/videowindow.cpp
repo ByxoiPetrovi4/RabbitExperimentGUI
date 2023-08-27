@@ -9,6 +9,7 @@ VideoWindow::VideoWindow(QSVideo::VideoParams videoParams, QString key, QString 
     USE_CHLIT
     ui->setupUi(this);
     viewier = new QSFrameViewier(this);
+    record = std::make_shared<int>(1);
     thread = new std::thread([this, filePath, record_fps]()
     {
         //TODO: add check for source!
@@ -41,7 +42,7 @@ VideoWindow::VideoWindow(QSVideo::VideoParams videoParams, QString key, QString 
         {
 
             auto upd = cam.update();
-            if(upd == QSVideo::QSV_NEW)
+            if(upd == QSVideo::QSV_NEW && *record!=0)
             {
                 auto fr = cam.getFrameL();
                 if(fr.time > durus)
@@ -58,7 +59,6 @@ VideoWindow::VideoWindow(QSVideo::VideoParams videoParams, QString key, QString 
     });
     thread->detach();
     ui->mainLayout->addWidget(viewier);
-    ui->groupBox->setEnabled(false);
 }
 
 VideoWindow::~VideoWindow()
@@ -99,7 +99,7 @@ void            VideoWindow::stop()
 
 void            VideoWindow::fps(float f)
 {
-    qDebug() << f;
+    ui->fpsLabel->setText("FPS: " + QString::number(f));
 }
 
 void            VideoWindow::closeEvent(QCloseEvent *event)
@@ -115,3 +115,24 @@ void            VideoWindow::closeEvent(QCloseEvent *event)
             event->accept();
         }
 }
+
+void VideoWindow::on_recordButton_clicked()
+{
+    if(*record)
+    {
+        *record = 0;
+        ui->recordButton->setText("Continue record");
+    }
+    else
+    {
+        ui->recordButton->setText("Pause record");
+        *record = 1;
+    }
+}
+
+
+void VideoWindow::on_playButton_clicked()
+{
+
+}
+

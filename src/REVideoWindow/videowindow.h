@@ -20,6 +20,7 @@ class VideoWindow : public QMainWindow
     QSFrameViewier          *viewier;
     QSVideo::VideoParams    params;
     std::thread             *thread;
+    std::shared_ptr<int>    record;
     float                   videofile_fps = 30.f;
 public:
     explicit VideoWindow(QSVideo::VideoParams videoParams, QString key, QString filePath = "/tmp/live.avi",
@@ -39,6 +40,8 @@ private slots:
     void            error(int);
     void            stop();
     void            closeEvent(QCloseEvent *event) override;
+    void on_recordButton_clicked();
+    void on_playButton_clicked();
 };
 
 #endif // VIDEOWINDOW_H

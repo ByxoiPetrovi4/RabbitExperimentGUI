@@ -47,9 +47,21 @@
             <number>12</number>
            </property>
            <item>
+            <widget class="QLabel" name="fpsLabel">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>TextLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="recordButton">
              <property name="text">
-              <string>Record</string>
+              <string>Pause Record</string>
              </property>
             </widget>
            </item>

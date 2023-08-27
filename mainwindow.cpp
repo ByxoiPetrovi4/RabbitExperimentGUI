@@ -21,6 +21,10 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
     hkeySound->setKey(Qt::CTRL | Qt::Key_S);
     hkeyPause->setKey(Qt::CTRL | Qt::Key_P);
 
+    ui->modeComboBox->addItem("Old training mode");
+    ui->modeComboBox->addItem("Auto old train");
+    ui->modeComboBox->addItem("New train mode");
+
     connect(hkeyFeed, SIGNAL(activated()),
             this, SLOT(on_feedButton_clicked()));
     connect(hkeyEFeed, SIGNAL(activated()),
@@ -243,7 +247,7 @@ void MainWindow::on_cameraButton_clicked()
     params.fwidth = 1280;
     params.fps = 30;
     strcpy(params.src_name, "2");
-    vw1 = new VideoWindow(params, "RE_Video2", saveDirectory + "/" + subDir + "/video2.avi", 25.f);
+    vw1 = new VideoWindow(params, "RE_Video2", saveDirectory + "/" + subDir + "/video2.avi", 30.f);
     qDebug() << params.fwidth << params.fheight;
     vw1->show();
 }
@@ -273,7 +277,8 @@ void MainWindow::on_settingsButton_clicked()
     st.food = ui->foodSPBox->value();
     st.press_interval = ui->pressIntervalSPBox->value()*1000;
     st.sound_length = ui->soundLengthSPBox->value()*1000;
-    st.manual = ui->manualCheck->isChecked() ? 1 : 0;
+    st.manual = ui->modeComboBox->currentIndex();
+    qDebug() << "Choodes mode:" << st.manual;
     st.min_delay = ui->minDelaySPBox->value()*1000;
     st.max_delay = ui->maxDelaySPBox->value()*1000;
     reSerial->sendSettings(st);
@@ -284,6 +289,7 @@ void MainWindow::on_sdTimercount()
     /*statvfs64("/", &diskStats);
     diskStats.
     freeSpace = diskStats.f_bavail*4096ull/1000000000.0;*/
+
     ui->spaceLabel->setText(tr("Free space: ") + QString::number(freeSpace) + " Gb");
     /*if(freeSpace < 5.0)
     {
@@ -323,9 +329,8 @@ void MainWindow::experimentStop()
 
 void MainWindow::readConfig()
 {
-    FILE* cfgFile = fopen(RE_CONFIG_FILENAME, "r");
     std::fstream cfg_stream;
-    cfg_stream.open(RE_CONFIG_FILENAME);
+    cfg_stream.open(configPath.toStdString(), std::ios_base::in);
     if(!cfg_stream.is_open())
     {
         qDebug() << "Config couldn't be read!";
@@ -339,84 +344,72 @@ void MainWindow::readConfig()
         return;
     }
     cfg_stream.close();
-
-    if(cfgFile == 0)
+    if(!config["DefaultMode"].is_number_unsigned())
+        qWarning() << "No deafult state set.";
+    else
     {
-        qDebug() << std::strerror(errno);
-        return;
+        int i = config["DefaultMode"].get<int>();
+        if(i > 2)
+            qWarning() << "Incorrect default index!";
+        else
+            ui->modeComboBox->setCurrentIndex(i);
     }
-    char buf[127];
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
+    if(!config["SoundLength"].is_number_unsigned())
+        qWarning() << "No deafult sound length set.";
+    else
     {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->manualCheck->setChecked(buf[0] != 0);
-           break;
-       }
+        float i = config["SoundLength"].get<int>()/1000.f;
+        if(i > 10000)
+            qWarning() << "Incorrect default sound length!";
+        else
+            ui->soundLengthSPBox->setValue(i);
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
+    if(!config["PressInterval"].is_number_unsigned())
+        qWarning() << "No deafult press interval.";
+    else
     {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->soundLengthSPBox->setValue(strtod(buf, 0));
-           break;
-       }
+        float i = config["PressInterval"].get<int>()/1000.f;
+        if(i > 100000)
+            qWarning() << "Incorrect default press interval!";
+        else
+            ui->pressIntervalSPBox->setValue(i);
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
+    if(!config["MaxDelay"].is_number_unsigned())
+        qWarning() << "No deafult max delay set.";
+    else
     {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->pressIntervalSPBox->setValue(strtod(buf, 0));
-           break;
-       }
+        float i = config["MaxDelay"].get<int>()/1000.f;
+        if(i > 1000000)
+            qWarning() << "Incorrect default max delay!";
+        else
+            ui->maxDelaySPBox->setValue(i);
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
+    if(!config["MinDelay"].is_number_unsigned())
+        qWarning() << "No deafult min delay set.";
+    else
     {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->maxDelaySPBox->setValue(strtod(buf, 0));
-           break;
-       }
+        float i = config["MinDelay"].get<int>()/1000.f;
+        if(i < 0)
+            qWarning() << "Incorrect default min delay!";
+        else
+            ui->minDelaySPBox->setValue(i);
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 32, cfgFile))
+    if(!config["FoodQuantity"].is_number_unsigned())
+        qWarning() << "No deafult food quantity.";
+    else
     {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->minDelaySPBox->setValue(strtod(buf, 0));
-           break;
-       }
+        int i = config["FoodQuantity"].get<int>();
+        if(i > 126)
+            qWarning() << "Incorrect default food quantity!";
+        else
+            ui->foodSPBox->setValue(i);
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 32, cfgFile))
+    if(!config["DefaultDirectory"].is_string())
+        qWarning() << "No deafult working directory will write to temporary.";
+    else
     {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->foodSPBox->setValue(strtol(buf, 0, 0));
-           break;
-       }
+        saveDirectory = config["DefaultDirectory"].get<std::string>().c_str();
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 32, cfgFile))
-    {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           saveDirectory = tr(buf);
-           break;
-       }
-    }
-    fclose(cfgFile);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -449,5 +442,16 @@ void MainWindow::on_recordSoundButton_clicked()
     {
         waw.~shared_ptr();
     }
+}
+
+
+void MainWindow::on_actionTo_MJPG_triggered()
+{
+    QStringList listToConvert = QFileDialog::getOpenFileNames(this, tr("Choose files to convert"),
+                                saveDirectory, "Videos (*.avi *.mp4 *.mkv *.mov *.yuy)", nullptr,
+                                QFileDialog::DontResolveSymlinks);
+    qDebug() << listToConvert;
+    auto p = new QProcess(this);
+    p->startDetached("ffmpeg", {"-i", listToConvert[0], "-vcodec", "mjpeg", "/tmp/test_vid.avi"});
 }
 
