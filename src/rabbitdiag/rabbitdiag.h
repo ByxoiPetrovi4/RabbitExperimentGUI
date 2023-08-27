@@ -7,11 +7,12 @@
 #include <QDate>
 #include <QTime>
 #include <iostream>
+#include <fstream>
 #include <cerrno>
+#include "../../include/json.hpp"
 #include "protocol.h"
 
-#define REDIAG_CONFIG_FILENAME "rediag.cfg"
-#define REDIAG_COMMENT_SYMBOL '#'
+#define REDIAG_CONFIG_FILENAME "RE_dialog.json"
 
 namespace Ui {
 class RabbitDiag;

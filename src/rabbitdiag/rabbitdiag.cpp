@@ -29,43 +29,48 @@ RabbitDiag::~RabbitDiag()
 void RabbitDiag::readConfig()
 {
     char buf[64];
-    FILE* cfgFile = fopen(REDIAG_CONFIG_FILENAME, "r");
-    if(cfgFile == 0)
+    std::fstream cfg_stream;
+    cfg_stream.open(REDIAG_CONFIG_FILENAME, std::ios_base::in);
+    if(!cfg_stream.is_open())
     {
-        ui->actorName->addItem(QString("Joka"));
-        ui->spectatorName->addItem(QString("Boka"));
-        ui->workerName->addItem(QString("Bogdan"));
-        qDebug() << std::strerror(errno);
+        qDebug() << "Config couldn't be read!";
         return;
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
-    {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->workerName->addItem(QString(buf));
-       }
+    nlohmann::json config;
+    try {
+        cfg_stream >> config;
+    } catch (std::exception &exc) {
+        qDebug() << exc.what();
+        return;
     }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
-    {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->actorName->addItem(QString(buf));
-       }
-    }
-    for(char* p = fgets(buf, 64, cfgFile); buf[0]!='\n' || buf[0] == EOF;
-        fgets(buf, 64, cfgFile))
-    {
-       if(buf[0]!=REDIAG_COMMENT_SYMBOL || p == 0)
-       {
-           buf[strlen(buf)-1] = 0;
-           ui->spectatorName->addItem(QString(buf));
-       }
-    }
-    fclose(cfgFile);
+    cfg_stream.close();
+    if(!config["Workers"].is_array())
+        qWarning() << "REDiag config no workers defind!";
+    else
+        for(auto &&i : config["Workers"])
+        {
+            if(!i.is_string())
+                break;
+            ui->workerName->addItem(i.get<std::string>().c_str());
+        }
+    if(!config["Actors"].is_array())
+        qWarning() << "REDiag config no actors defind!";
+    else
+        for(auto &&i : config["Actors"])
+        {
+            if(!i.is_string())
+                break;
+            ui->actorName->addItem(i.get<std::string>().c_str());
+        }
+    if(!config["Spectators"].is_array())
+        qWarning() << "REDiag config no spectators defind!";
+    else
+        for(auto &&i : config["Spectators"])
+        {
+            if(!i.is_string())
+                break;
+            ui->spectatorName->addItem(i.get<std::string>().c_str());
+        }
 }
 
 Info_Settings RabbitDiag::settings()

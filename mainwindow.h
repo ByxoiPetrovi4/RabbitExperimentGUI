@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QShortcut>
 #include <QStorageInfo>
+#include <QProcess>
 #include "serialdiag.h"
 #include "rabbitdiag.h"
 #include "data_handler.h"
@@ -18,7 +19,7 @@
 #include "src/REWAVAudioWriter/rewavaudiowriter.h"
 #include "qsframeviewier.h"
 
-#define RE_CONFIG_FILENAME "defsettings.cfg"
+#define RE_CONFIG_FILENAME "defsettings.json"
 #define RE_COMMENT_SYMBOL  '#'
 
 QT_BEGIN_NAMESPACE
@@ -83,6 +84,8 @@ private slots:
 
     void on_recordSoundButton_clicked();
 
+    void on_actionTo_MJPG_triggered();
+
 private:
     Ui::MainWindow *ui = nullptr;
     SerialDiag*     serialDialog = nullptr;
@@ -104,7 +107,14 @@ private:
     bool connected;
     bool readyToStart;
     bool experimentActive;
-    QString saveDirectory;
+    QString configPath = "./defsettings.json";
+    QString saveDirectory =
+            #ifdef __linux__
+                "/tmp";
+            #endif
+            #ifdef WIN64
+                "./";
+            #endif
     QString subDir;
     QSFrameViewier gv;
     QSFrameViewier fv;
