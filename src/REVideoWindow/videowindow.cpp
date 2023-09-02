@@ -99,7 +99,7 @@ void            VideoWindow::stop()
 
 void            VideoWindow::fps(float f)
 {
-    ui->fpsLabel->setText("FPS: " + QString::number(f));
+    ui->fpsLabel->setText("FPS: " + QString::number(f, 'g', 3));
 }
 
 void            VideoWindow::closeEvent(QCloseEvent *event)

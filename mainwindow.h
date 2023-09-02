@@ -119,7 +119,7 @@ private:
     QSFrameViewier gv;
     QSFrameViewier fv;
 
-    QStorageInfo diskStats;
+    QStorageInfo diskStats = QStorageInfo::root();
     double freeSpace;   //free space in Gb
 
     void experimentStart();

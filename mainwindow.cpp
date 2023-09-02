@@ -23,7 +23,8 @@ MainWindow::MainWindow(CameraWriter* cw, wrwindow* wrw, QWidget *parent)
 
     ui->modeComboBox->addItem("Old training mode");
     ui->modeComboBox->addItem("Auto old train");
-    ui->modeComboBox->addItem("New train mode");
+    ui->modeComboBox->addItem("New training mode");
+    ui->modeComboBox->addItem("Retard training mode");
 
     connect(hkeyFeed, SIGNAL(activated()),
             this, SLOT(on_feedButton_clicked()));
@@ -90,6 +91,8 @@ void MainWindow::stateChange(RESerial::ProcessState st)
         case RESerial::AwaitEvent:
             ui->settingsBox->setEnabled(true);
             ui->cameraButton->setEnabled(true);
+            ui->camera2Button->setEnabled(true);
+            ui->recordSoundButton->setEnabled(true);
             ui->connectButton->setText(tr("Disconnect"));
             connected = true;
             break;
@@ -166,11 +169,14 @@ void MainWindow::on_connectButton_clicked()
         connected = false;
         ui->connectButton->setText(tr("Connect"));
         ui->cameraButton->setEnabled(false);
+        ui->camera2Button->setEnabled(false);
+        ui->recordSoundButton->setEnabled(false);
         return;
     }
     try {
         subDir = QDateTime::currentDateTime().toString(Qt::ISODate) +
                 "_" + rabbitDialog->getSubdirectory();
+        subDir.replace(':', '-');
         reSerial->setWorkDir(saveDirectory, subDir);
         reSerial->Connect(serialDialog->settings());
     }  catch (QString exp) {
@@ -286,19 +292,16 @@ void MainWindow::on_settingsButton_clicked()
 
 void MainWindow::on_sdTimercount()
 {
-    /*statvfs64("/", &diskStats);
-    diskStats.
-    freeSpace = diskStats.f_bavail*4096ull/1000000000.0;*/
-
+    freeSpace = diskStats.bytesAvailable()/1024/1024/1024;
     ui->spaceLabel->setText(tr("Free space: ") + QString::number(freeSpace) + " Gb");
-    /*if(freeSpace < 5.0)
+    if(freeSpace < 5.0)
     {
         QMessageBox::warning(this, tr("Rabbit experiment"), tr("Low on freespace autostop on 1 Gb"));
     }
     if(freeSpace < 1.0)
     {
         experimentStop();
-    }*/
+    }
 }
 
 void MainWindow::experimentStart()
@@ -349,7 +352,7 @@ void MainWindow::readConfig()
     else
     {
         int i = config["DefaultMode"].get<int>();
-        if(i > 2)
+        if(i > 3)
             qWarning() << "Incorrect default index!";
         else
             ui->modeComboBox->setCurrentIndex(i);

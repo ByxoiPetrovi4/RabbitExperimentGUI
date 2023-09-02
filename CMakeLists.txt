@@ -11,6 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#set(CMAKE_CXX_FLAGS "-o3")
+
 if(WIN32)
     set(OpenCV_DIR "C:\\OpenCV\\build\\")
 endif(WIN32)
